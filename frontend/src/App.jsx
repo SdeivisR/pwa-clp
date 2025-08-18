@@ -1,23 +1,24 @@
+// src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import './index.css'
-import Navbar from "./components/Navbar";
+import Navbar from "./components/Navbar"; // Solo importas Navbar
 import Home from "./pages/Home";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
-function App() {
+export default function App() {
   return (
+    <Router>
+      <div className="relative min-h-screen">
+        <Navbar /> {/* Renderizas Navbar sin props */}
 
-      <Router>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-
+        <main className="p-4">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
-
-export default App;

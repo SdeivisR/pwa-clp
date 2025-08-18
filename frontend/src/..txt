@@ -1,0 +1,185 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import "../styles/Navbar.css";
+import { ChevronRight, ChevronDown } from "lucide-react";
+
+export default function Navbar() {
+  // Estado para controlar la apertura del menú móvil
+  const [isOpen, setIsOpen] = useState(false);
+  // Estado para controlar qué submenú está abierto (dropdown o acordeón)
+  const [activeMenu, setActiveMenu] = useState(null);
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+    // Asegurarse de cerrar cualquier submenú abierto al cerrar el menú principal
+    if (isOpen) {
+      setActiveMenu(null);
+    }
+  };
+
+  const handleSubMenu = (menuName) => {
+    // Si el menú ya está activo, lo cierra; si no, lo abre
+    setActiveMenu(activeMenu === menuName ? null : menuName);
+  };
+
+  return (
+    <>
+      {/* Navbar fija */}
+      <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-50 h-[60px] md:h-[70px]">
+        <div className="flex items-center justify-between px-4 py-3 h-full">
+          <Link to="/" className="text-xl font-bold">
+            Group Sitem
+          </Link>
+
+          {/* Menú de escritorio (visible en pantallas grandes) */}
+          <div className="hidden [@media(min-width:766px)]:flex">
+            <ul className="flex items-center space-x-6 text-gray-800">
+              {/* Opción con menú desplegable */}
+              <li className="flex items-center relative">
+                <button
+                  onClick={() => handleSubMenu("find")}
+                  className="flex items-center hover:text-gray-600 focus:outline-none"
+                >
+                  Example
+                  <ChevronDown size={18} className="ml-1 text-gray-500" />
+                </button>
+                <ul
+                  className={`absolute top-full mt-2 w-48 bg-white shadow-lg rounded-md overflow-hidden transition-all duration-300 ${
+                    activeMenu === "find"
+                      ? "visible opacity-100 scale-100"
+                      : "invisible opacity-0 scale-95"
+                  }`}
+                >
+                  <li><Link to="/" className="block px-4 py-2 hover:bg-gray-100">Home 1</Link></li>
+                  <li><Link to="/find/model2" className="block px-4 py-2 hover:bg-gray-100">Home 2</Link></li>
+                  <li><Link to="/find/model3" className="block px-4 py-2 hover:bg-gray-100">Home 3</Link></li>
+                  <li><Link to="/find/model4" className="block px-4 py-2 hover:bg-gray-100">Home 4</Link></li>
+                </ul>
+              </li>
+              {/* Opción con menú desplegable */}
+              <li className="flex items-center relative">
+                <button
+                  onClick={() => handleSubMenu("about")}
+                  className="flex items-center hover:text-gray-600 focus:outline-none"
+                >
+                  Sobre
+                  <ChevronDown size={18} className="ml-1 text-gray-500" />
+                </button>
+                <ul
+                  className={`absolute top-full mt-2 w-48 bg-white shadow-lg rounded-md overflow-hidden transition-all duration-300 ${
+                    activeMenu === "about"
+                      ? "visible opacity-100 scale-100"
+                      : "invisible opacity-0 scale-95"
+                  }`}
+                >
+                  <li><Link to="/about/mission" className="block px-4 py-2 hover:bg-gray-100">Misión</Link></li>
+                  <li><Link to="/about/team" className="block px-4 py-2 hover:bg-gray-100">Equipo</Link></li>
+                </ul>
+              </li>
+              {/* Enlaces simples */}
+              <li>
+                <Link to="/contact" className="hover:text-gray-600">Contáctanos</Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Botón de menú móvil */}
+          <div className="md:hidden">
+            <button
+              onClick={toggleMenu}
+              className={`hamburger-button ${isOpen ? "open" : ""}`}
+            >
+              <span className="bar" />
+              <span className="bar" />
+              <span className="bar" />
+              <span className="bar" />
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Menú móvil (oculto por defecto) */}
+      <div
+        className={`fixed top-[60px] md:top-[70px] left-0 w-full h-full bg-gray-100 shadow-lg transform transition-transform duration-100 ease-in-out ${
+          isOpen ? "translate-y-0" : "-translate-y-full"
+        }`}
+        style={{ zIndex: 5 }}
+      >
+        <div className="p-6">
+          <ul className="space-y-3 mb-8">
+            {/* Elemento de acordeón para móvil */}
+            <li className="flex flex-col border-b border-gray-300 py-3">
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={() => handleSubMenu("find")}
+                  className="flex items-center text-gray-800 hover:text-gray-600 focus:outline-none"
+                >
+                  Example
+                  <ChevronDown
+                    size={18}
+                    className={`ml-1 text-gray-500 transition-transform ${
+                      activeMenu === "find" ? "rotate-180" : "rotate-0"
+                    }`}
+                  />
+                </button>
+                <ChevronRight size={20} className="text-gray-500" />
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  activeMenu === "find" ? "max-h-96 mt-2" : "max-h-0 mt-0"
+                }`}
+              >
+                <ul className="space-y-2 pl-4 pt-2">
+                  <li>
+                    <Link to="/find/home1" className="block text-gray-600 hover:text-gray-800" onClick={toggleMenu}>
+                      Home 1
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/find/home2" className="block text-gray-600 hover:text-gray-800" onClick={toggleMenu}>
+                      Home 2
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/find/home3" className="block text-gray-600 hover:text-gray-800" onClick={toggleMenu}>
+                      Home 3
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/find/home4" className="block text-gray-600 hover:text-gray-800" onClick={toggleMenu}>
+                      Home 4
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            <li className="flex justify-between items-center border-b border-gray-300 py-3">
+              <Link to="/about" className="text-gray-800" onClick={toggleMenu}>
+                Sobre
+              </Link>
+              <ChevronRight size={20} className="text-gray-500" />
+            </li>
+            <li className="flex justify-between items-center border-b border-gray-300 py-3">
+              <Link to="/services" className="text-gray-800" onClick={toggleMenu}>
+                Error
+              </Link>
+              <ChevronRight size={20} className="text-gray-500" />
+            </li>
+            <li className="flex justify-between items-center border-b border-gray-300 py-3">
+              <Link to="/world" className="text-gray-800" onClick={toggleMenu}>
+                Example
+              </Link>
+              <ChevronRight size={20} className="text-gray-500" />
+            </li>
+            <li className="flex justify-between items-center border-b border-gray-300 py-3">
+              <Link to="/contact" className="text-gray-800" onClick={toggleMenu}>
+                Example
+              </Link>
+              <ChevronRight size={20} className="text-gray-500" />
+            </li>
+          </ul>
+        </div>
+      </div>
+    </>
+  );
+}
