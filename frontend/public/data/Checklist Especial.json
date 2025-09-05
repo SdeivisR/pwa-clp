@@ -1,0 +1,54 @@
+[
+  {
+    "id": "7cb81046-f3f5-49dd-ac4d-6f1fc68511ca",
+    "name": "Grupo Preestablecido 1",
+    "fields": [
+      {
+        "id": "1f61c89c-3f6a-4080-9aac-f977d2109f54",
+        "type": "Texto",
+        "label": "Conductor",
+        "value": null,
+        "required": true
+      },
+      {
+        "id": "24ff35b4-9608-4d11-99d9-76eedd66e229",
+        "type": "Kilometraje",
+        "label": "Kilometraje",
+        "value": null,
+        "required": true
+      },
+      {
+        "id": "7bdad55a-5ad7-4be3-a998-944fd7cb92c9",
+        "type": "Texto",
+        "label": "Placa",
+        "value": null
+      },
+      {
+        "id": "70cda632-571c-480e-9892-e70b86a3e8b5",
+        "type": "Texto",
+        "label": "Responsable de la Inspeccion",
+        "value": null
+      },
+      {
+        "id": "fe266c2c-ec6b-411b-a5d9-ec4d504df8d0",
+        "type": "FechasP",
+        "label": "Fechas",
+        "value": null,
+        "startDate": "",
+        "endDate": ""
+      },
+      {
+        "id": "bb64130f-6019-437d-80de-6ba5dd13eaef",
+        "type": "Hora",
+        "label": "Hora de Ingreso",
+        "value": null
+      },
+      {
+        "id": "f64a082c-64c9-43dd-bb19-f06bb9923960",
+        "type": "Texto",
+        "label": "Empresa",
+        "value": null
+      }
+    ]
+  }
+] 

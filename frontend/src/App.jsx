@@ -10,6 +10,9 @@ import Configuracion from "./pages/Configuracion";
 import UsersPage from "./pages/Users";
 import NCheck from "./pages/nCheck";
 import CPlant from "./pages/cPLant";
+import GPlant from "./pages/gPLant";
+import ChecklistTemplateBuilder from "./pages/cPlant";
+
 
 
 export default function App() {
@@ -29,6 +32,9 @@ export default function App() {
             <Route path="/users" element={<UsersPage />} />
             <Route path="/nCheck" element={<NCheck />} />
             <Route path="/cPlant" element={<CPlant />} />
+            <Route path="/gPlant" element={<GPlant />} />
+            <Route path="/cplant/:filename" element={<ChecklistTemplateBuilder />} />
+
 
 
  

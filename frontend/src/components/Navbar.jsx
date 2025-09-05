@@ -270,7 +270,8 @@ export default function Navbar() {
                 </ul>
               </li>
             </ul>
-            <button
+            <div className="relative w-10 h-10">
+              <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors duration-200"
               >
@@ -279,7 +280,7 @@ export default function Navbar() {
                 ) : (
                   <UserCircle2 size={24} />
                 )}
-            </button>
+              </button>
 
             {showUserMenu && (
               <UserMenu
@@ -290,9 +291,9 @@ export default function Navbar() {
               />
             )}
           </div>
-
+       </div>
           {/* Botón menú móvil */}
-          <div className="hidden [@media(max-width:765px)]:flex items-center justify-between px-2">
+          <div className="hidden [@media(max-width:765px)]:flex w-full items-center justify-end  px-2">
             <button
               onClick={toggleMenu}
               className={`hamburger-button ${isOpen ? "open" : ""}`}
@@ -302,6 +303,8 @@ export default function Navbar() {
               <span className="bar" />
               <span className="bar" />
             </button>
+          </div>
+          <div className="hidden [@media(max-width:765px)]:flex  relative w-10 h-10">
             <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors duration-200"
@@ -320,7 +323,7 @@ export default function Navbar() {
                 setShowUserMenu={setShowUserMenu}
               />
             )}
-          </div>
+            </div>
         </div>
       </nav>
 

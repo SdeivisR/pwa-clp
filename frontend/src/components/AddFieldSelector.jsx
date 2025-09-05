@@ -394,6 +394,20 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
               {field.type === "Fechas" && (
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      disabled
+                      value={field.startDate || ""}
+                      className="border border-gray-300 rounded-md px-2 py-1 w-full"
+                    />
+                  </div>                  
+                </div>
+              )}
+
+
+              {field.type === "FechasP" && (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
                     <label className="text-sm text-gray-600 w-20">Entrada:</label>
                     <input
                       type="date"
@@ -414,8 +428,7 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
                       }}
                       className="border border-gray-300 rounded-md px-2 py-1 w-full"
                     />
-                  </div>
-
+                  </div>                  
                   <div className="flex items-center gap-2">
                     <label className="text-sm text-gray-600 w-20">Salida:</label>
                     <input

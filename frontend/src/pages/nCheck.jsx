@@ -6,20 +6,27 @@ import TemplatesModal from "../components/TemplatesModal";
 import { Input } from "../components/ui/input";
 import { Checkbox } from "../components/ui/checkbox";
 import { Textarea } from "../components/ui/textarea";
-import { Button } from "../components/ui/button";
-
+import SignaturePad from "@/components/SignaturePad"; 
+import { v4 as uuidv4 } from "uuid";
 
 export default function NCheck() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1);
+  const [step] = useState(1);
   const [showModal, setShowModal] = useState(false); 
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [recommendation, setRecommendation] = useState("");
+  const [activeSignatureField, setActiveSignatureField] = useState(null);
+  const [fields, setFields] = useState([]);
+
 
   const handleCreateTemplate = () => {
     setLoading(true);
     navigate("/cPlant");
   };
+
+
 
   const steps = [
     "Selección de plantilla",
@@ -34,84 +41,90 @@ export default function NCheck() {
 
     // Lista de plantillas
   const templates = [
-    { name: "Checklist Vehicular", fields: [
-  {
-    "id": "8cc69327-7b2d-4554-bb84-128a22fac34e",
-    "name": "Grupo 1",
-    "fields": [
-      {
-        "type": "Checkbox",
-        "label": "Nuevo Checkbox"
-      },
-      {
-        "type": "Comentario",
-        "label": "Nuevo Comentario"
-      },
-      {
-        "type": "Fechas",
-        "label": "Nuevo Fechas"
-      },
-      {
-        "type": "Firma",
-        "label": "Nuevo Firma"
-      },
-      {
-        "type": "Firma + Texto",
-        "label": "Nuevo Firma + Texto"
-      },
-      {
-        "type": "Hora",
-        "label": "Nuevo Hora"
-      },
-      {
-        "type": "Imágenes tipo lista",
-        "label": "Nuevo Imágenes tipo lista"
-      },
-      {
-        "type": "Kilometraje",
-        "label": "Nuevo Kilometraje"
-      },
-      {
-        "type": "Lista",
-        "label": "Nuevo Lista"
-      },
-      {
-        "type": "Numérico",
-        "label": "Nuevo Numérico"
-      },
-      {
-        "type": "Recomendación Inteligente (IA)",
-        "label": "Nuevo Recomendación Inteligente (IA)"
-      },
-      {
-        "type": "Selección Múltiple",
-        "label": "Nuevo Selección Múltiple"
-      },
-      {
-        "type": "Texto",
-        "label": "Nuevo Texto"
-      },
-      {
-        "type": "Texto + Si/No",
-        "label": "Nuevo Texto + Si/No"
-      }
-    ]
-  },
-]
- },
     { name: "Inspección de Seguridad", fields: [
   {
-    "id": "8cc69327-7b2d-4554-bb84-128a22fac34e",
-    "name": "Grupo 1",
+    "id": "7cb81046-f3f5-49dd-ac4d-6f1fc68511ca",
+    "name": "Grupo Preestablecido 1",
     "fields": [
       {
+        "id": "1f61c89c-3f6a-4080-9aac-f977d2109f54",
         "type": "Texto",
-        "label": "Nuevo Checkbox"
+        "label": "Conductor",
+        "value": null
       },
+      {
+        "id": "24ff35b4-9608-4d11-99d9-76eedd66e229",
+        "type": "Kilometraje",
+        "label": "Kilometraje",
+        "value": null
+      },
+      {
+        "id": "7bdad55a-5ad7-4be3-a998-944fd7cb92c9",
+        "type": "Texto",
+        "label": "Placa",
+        "value": null
+      },
+      {
+        "id": "70cda632-571c-480e-9892-e70b86a3e8b5",
+        "type": "Texto",
+        "label": "Responsable de la Inspeccion",
+        "value": null
+      },
+      {
+        "id": "fe266c2c-ec6b-411b-a5d9-ec4d504df8d0",
+        "type": "FechasP",
+        "label": "Fechas",
+        "value": null,
+        "startDate": "",
+        "endDate": ""
+      },
+      {
+        "id": "bb64130f-6019-437d-80de-6ba5dd13eaef",
+        "type": "Hora",
+        "label": "Hora de Ingreso",
+        "value": null
+      },
+      {
+        "id": "f64a082c-64c9-43dd-bb19-f06bb9923960",
+        "type": "Texto",
+        "label": "Empresa",
+        "value": null
+      }
     ]
   }
 ] },
   ];
+// Función para guardar la firma en el campo correspondiente
+  const updateFieldValue = (fieldId, value) => {
+    setSelectedTemplate((prev) => {
+      if (!prev) return prev;
+
+      const newFields = prev.fields.map((group) => ({
+        ...group,
+        fields: group.fields.map((f) =>
+          f.id === fieldId ? { ...f, value } : f
+        ),
+      }));
+
+      return { ...prev, fields: newFields };
+    });
+  };
+  const updateFieldFull = (fieldId, updatedProps) => {
+  setSelectedTemplate((prev) => {
+    if (!prev) return prev;
+
+    const newFields = prev.fields.map((group) => ({
+      ...group,
+      fields: group.fields.map((f) =>
+        f.id === fieldId ? { ...f, ...updatedProps } : f
+      ),
+    }));
+
+    return { ...prev, fields: newFields };
+  });
+};
+
+
    const isGroupedTemplate = (template) => {
      return (
        template &&
@@ -124,52 +137,384 @@ export default function NCheck() {
  };
 const renderField = (field) => {
   switch (field.type) {
+
     case "Texto":
-      return <Input placeholder={field.label} />;
+        return (
+          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+            <label className="text-lg font-semibold text-gray-800 block mt-1">
+              {field.label}
+            </label>
+            <Input
+              type="text"
+              placeholder="Escribe aquí..."
+              className="rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base"
+            />
+          </div>
+        );
     case "Checkbox":
-      return <div className="flex items-center gap-2">
-        <Checkbox />
-        <span>{field.label}</span>
-      </div>;
+      return (
+        <CheckboxField field={field} />
+      );
+
+      function CheckboxField({ field }) {
+        const [value, setValue] = useState(null);
+
+        return (
+          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+            <span className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</span>
+            <div className="flex items-center gap-4 sm:gap-6">
+              <label
+                className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
+                  ${value === "si" ? "bg-green-100 border border-green-400" : "hover:bg-gray-100"}
+                `}
+                onClick={() => setValue("si")}
+              >
+              <Checkbox checked={value === "si"} />
+              <span className="text-gray-700 font-medium">Sí</span>
+            </label>
+            <label
+              className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
+                ${value === "no" ? "bg-red-100 border border-red-400" : "hover:bg-gray-100"}
+              `}
+              onClick={() => setValue("no")}
+            >
+              <Checkbox checked={value === "no"} />
+              <span className="text-gray-700 font-medium">No</span>
+            </label>
+          </div>
+        </div>
+      );}
     case "Comentario":
-      return <Textarea placeholder={field.label} />;
+      return (
+        <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
+          <Textarea
+            placeholder="Escribe tu comentario..."
+            className="min-h-[100px] rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition resize-none px-3 py-2 text-sm sm:text-base"
+          />
+        </div>
+      );
     case "Fechas":
-      return <Input type="date" placeholder={field.label} />;
+      return (
+        <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
+          <Input
+            type="date"
+            className="rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base"
+          />
+        </div>
+      );
+case "FechasP":
+  return (
+    <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+      <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
+
+      {/* Fecha de inicio */}
+      <input
+        type="date"
+        value={field.startDate || ""}
+        onChange={(e) => {
+          const newStart = e.target.value;
+          if (field.endDate && newStart > field.endDate) {
+            updateFieldFull(field.id, {
+              ...field,
+              startDate: "",
+              endDate: "",
+              error: "⚠️ La fecha de inicio no puede ser mayor que la de salida",
+            });
+            setTimeout(() => {
+              updateFieldFull(field.id, { ...field, error: "" });
+            }, 4000);
+          } else {
+            updateFieldFull(field.id, { startDate: newStart, error: "" });
+          }
+        }}
+        className="rounded-xl border border-gray-300 px-3 py-2 text-sm sm:text-base"
+      />
+
+      {/* Fecha de salida */}
+      <input
+        type="date"
+        value={field.endDate || ""}
+        onChange={(e) => {
+          const newEnd = e.target.value;
+          if (field.startDate && newEnd < field.startDate) {
+            updateFieldFull(field.id, {
+              ...field,
+              startDate: "",
+              endDate: "",
+              error: "⚠️ La fecha de salida no puede ser menor que la de inicio",
+            });
+             setTimeout(() => {
+              updateFieldFull(field.id, { ...field, error: "" });
+            }, 4000);
+          } else {
+            updateFieldFull(field.id, { endDate: newEnd, error: "" });
+          }
+        }}
+        className="rounded-xl border border-gray-300 px-3 py-2 text-sm sm:text-base"
+      />
+
+      {/* Tarjeta de error moderna */}
+      {field.error && (
+        <div className="mt-2 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm shadow-sm">
+          {field.error}
+        </div>
+      )}
+    </div>
+  );
+
+
+
     case "Hora":
-      return <Input type="time" placeholder={field.label} />;
+      return (
+        <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
+          <Input
+            type="time"
+            className="rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base"
+          />
+        </div>
+      );
     case "Kilometraje":
+      return (
+        <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
+          
+          <div className="relative flex items-center">
+            <Input
+              type="number"
+              placeholder="0"
+              className="w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base pr-12"
+            />
+            <span className="absolute right-3 text-gray-600 text-sm sm:text-base">km</span>
+          </div>
+        </div>
+      );
+
     case "Numérico":
-      return <Input type="number" placeholder={field.label} />;
+      return (
+        <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
+          <Input
+            type="number"
+            placeholder="0"
+            className="rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base"
+          />
+        </div>
+      );
+
     case "Lista":
-      return <select className="border rounded p-2 w-full">
-        <option value="">Seleccione una opción</option>
-      </select>;
-    case "Selección Múltiple": 
-      return <select multiple className="border rounded p-2 w-full">
-        <option value="">Opción 1</option>
-        <option value="">Opción 2</option>
-      </select>;
-    case "Firma":
-      return <div className="border rounded p-2">[Aquí canvas para firma]</div>;
+      return (
+        <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
+          <select
+            className="rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base text-gray-700"
+          >
+            <option value="">Seleccione una opción</option>
+            {field.items?.map((item, index) => (
+              <option key={index} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      );
+    case "Selección Múltiple":
+      return (
+        <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
+          <div className="pl-2 sm:pl-4 space-y-2">
+            {field.items?.map((item, index) => (
+              <label key={index} className="flex items-center gap-2 text-sm sm:text-base">
+                <input type="checkbox" value={item.value} className="h-4 w-4" />
+                <span>{item.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      );
+
+case "Firma":
+  return (
+    <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+      <label className="text-base sm:text-lg font-semibold text-gray-800">
+        {field.label}
+      </label>
+
+      {field.value ? (
+        <div className="relative">
+          <img
+            src={field.value}
+            alt="Firma guardada"
+            className="w-full h-32 object-contain border rounded-lg bg-gray-50"
+          />
+          <div className="mt-2 flex items-center gap-2">
+            <button
+              type="button"
+              className="px-3 py-1 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700"
+              onClick={() => setActiveSignatureField(field.id)}
+            >
+              Rehacer firma
+            </button>
+            <button
+              type="button"
+              className="px-3 py-1 rounded-lg bg-red-600 text-white text-sm hover:bg-red-700"
+              onClick={() => updateFieldValue(field.id, null)}
+            >
+              Borrar
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setActiveSignatureField(field.id)}
+          className="w-full h-32 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50"
+        >
+          Toca aquí para firmar
+        </button>
+
+      )}
+    </div>
+  );
+
+
+
+
     case "Firma + Texto":
-      return <div className="flex flex-col gap-2">
-        <div className="border rounded p-2">[Aquí canvas para firma]</div>
-        <Input placeholder="Texto adicional" />
-      </div>;
+  return (
+    <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+      <label className="text-base sm:text-lg font-semibold text-gray-800">
+        {field.label}
+      </label>
+                <input
+            type="text"
+            placeholder="Escribir aquí..."
+            className="border rounded-xl px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-200"
+          />
+
+
+      {field.value ? (
+        <div className="relative">
+          <img
+            src={field.value}
+            alt="Firma guardada"
+            className="w-full h-32 object-contain border rounded-lg bg-gray-50"
+          />
+          <div className="mt-2 flex items-center gap-2">
+            <button
+              type="button"
+              className="px-3 py-1 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700"
+              onClick={() => setActiveSignatureField(field.id)}
+            >
+              Rehacer firma
+            </button>
+            <button
+              type="button"
+              className="px-3 py-1 rounded-lg bg-red-600 text-white text-sm hover:bg-red-700"
+              onClick={() => updateFieldValue(field.id, null)}
+            >
+              Borrar
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setActiveSignatureField(field.id)}
+          className="w-full h-32 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50"
+        >
+          Toca aquí para firmar
+        </button>
+
+      )}
+    </div>
+  );
     case "Imágenes tipo lista":
-      return <div className="flex flex-col gap-2">
-        <Button>Subir imagen</Button>
-      </div>;
+      return (
+        <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
+          <div className="flex flex-col gap-1">
+            {field.items?.map((item, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => setSelectedImage(item.imageUrl)}
+                className="text-left px-2 py-1 border rounded hover:bg-gray-100 text-sm sm:text-base"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          {selectedImage && (
+            <div className="mt-3 flex justify-center">
+              <img
+                src={selectedImage}
+                alt="Imagen seleccionada"
+                className="w-48 sm:w-64 h-auto rounded-lg border shadow-sm"
+              />
+            </div>
+          )}
+        </div>
+      );
     case "Recomendación Inteligente (IA)":
-      return <div className="p-2 bg-gray-100 rounded">[Aquí se mostrará recomendación IA]</div>;
+      return (
+        <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
+          <div className="p-3 bg-gray-100 rounded-xl border text-gray-600 italic text-sm sm:text-base">
+            {recommendation || "La IA aún no ha generado una recomendación..."}
+          </div>
+        </div>
+      );
+
     case "Texto + Si/No":
-      return <div className="flex items-center gap-2">
-        <Input placeholder={field.label} />
-        <select className="border rounded p-2">
-          <option>Sí</option>
-          <option>No</option>
-        </select>
-      </div>;
+        return (
+    <TextoSiNo field={field} />
+  );
+
+function TextoSiNo({ field }) {
+  const [value, setValue] = useState(null); // "si" | "no" | null
+
+  return (
+    <div className="flex flex-col gap-2 w-full p-4 rounded-2xl shadow-md bg-white border border-gray-200">
+      {/* Label como título */}
+      <label className="text-lg font-semibold text-gray-800 block mt-1">
+        {field.label}
+      </label>
+
+      {/* Input moderno */}
+      <Input
+        type="text"
+        placeholder="Escribe aquí..."
+        className="rounded-xl border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition mb-3"
+      />
+
+      {/* Opción Sí / No con mismo estilo que el Checkbox exclusivo */}
+      <div className="flex items-center gap-6">
+        <label
+          className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition 
+            ${value === "si" ? "bg-green-100 border border-green-400" : "hover:bg-gray-100"}
+          `}
+          onClick={() => setValue("si")}
+        >
+          <Checkbox checked={value === "si"} />
+          <span className="text-gray-700 font-medium">Sí</span>
+        </label>
+
+        <label
+          className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition 
+            ${value === "no" ? "bg-red-100 border border-red-400" : "hover:bg-gray-100"}
+          `}
+          onClick={() => setValue("no")}
+        >
+          <Checkbox checked={value === "no"} />
+          <span className="text-gray-700 font-medium">No</span>
+        </label>
+      </div>
+    </div>
+  );
+}
     default:
       return <div className="text-red-500">Tipo no soportado: {field.type}</div>;
   }
@@ -264,6 +609,25 @@ const renderField = (field) => {
         templates={templates}
         onSelect={(tpl) => setSelectedTemplate(tpl)}
       />
+
+{activeSignatureField && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl shadow-lg p-4 w-[92%] max-w-[520px]">
+      <h2 className="text-lg font-semibold text-gray-800 mb-3">Firmar</h2>
+
+      <SignaturePad
+        width={480}   // se ve bien en PC y móvil
+        height={220}
+        onSave={(dataUrl) => {
+          updateFieldValue(activeSignatureField, dataUrl);
+          setActiveSignatureField(null);
+        }}
+        onCancel={() => setActiveSignatureField(null)}
+      />
+    </div>
+  </div>
+)}
+
 
     </div>
   );
