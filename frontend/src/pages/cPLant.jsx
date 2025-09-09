@@ -44,6 +44,7 @@ export default function ChecklistTemplateBuilder() {
       label: f.label,
       value: null,
       ...(f.type === "FechasP" ? { startDate: "", endDate: "" } : {}),
+     
     }));
 
     setGroups((prev) => [
@@ -69,6 +70,8 @@ export default function ChecklistTemplateBuilder() {
       label: `Nuevo ${type}`,
       value: null,
       ...(type === "FechasP" ? { startDate: "", endDate: "" } : {}),
+      ...(type === "Checkbox" ? { cB: null } : {}),
+      ...(type === "Texto + Si/No" ? { cB: null } : {}),
     };
     const updated = [...groups];
     updated[groupIndex].fields.push(newField);

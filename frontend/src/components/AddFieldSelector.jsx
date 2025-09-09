@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2       } from "lucide-react";
 import SignatureCanvas from "react-signature-canvas";
 
 // Tipos de campos disponibles
@@ -145,18 +145,26 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
                 <Input type="number" placeholder="Número..." disabled className="bg-gray-100 cursor-not-allowed" />
               )}
               {field.type === "Checkbox" && (
-                <div className="flex gap-6">
+                <div className="flex gap-6 opacity-60">
                   <div className="flex items-center gap-2">
-                    <Checkbox id={`si-${fieldIndex}`} />
-                    <label htmlFor={`si-${fieldIndex}`}>SI</label>
+                    <Checkbox
+                      id={`si-${field.id}`}
+                      checked={field.cB === "si"}
+                      disabled
+                    />
+                    <label htmlFor={`si-${field.id}`}>SI</label>
                   </div>
+
                   <div className="flex items-center gap-2">
-                    <Checkbox id={`no-${fieldIndex}`} />
-                    <label htmlFor={`no-${fieldIndex}`}>NO</label>
+                    <Checkbox
+                      id={`no-${field.id}`}
+                      checked={field.cB === "no"}
+                      disabled
+                    />
+                    <label htmlFor={`no-${field.id}`}>NO</label>
                   </div>
                 </div>
-              )}
-
+              )}  
               {field.type === "Comentario" && (
                 <Textarea placeholder="Escribe comentario..." disabled className="bg-gray-100 cursor-not-allowed"/>
                )}

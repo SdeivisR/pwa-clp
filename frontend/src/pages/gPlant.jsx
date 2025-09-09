@@ -112,6 +112,7 @@ export default function GPlant() {
           </div>
         </CardContent>
       </Card>
+      
     </div>
   );
 }

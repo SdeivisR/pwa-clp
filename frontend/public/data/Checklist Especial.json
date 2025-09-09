@@ -50,5 +50,105 @@
         "value": null
       }
     ]
+  },
+  {
+    "id": "6d411de7-da58-4d5a-83e5-601770a7f497",
+    "name": "Grupo Preestablecido 2",
+    "fields": [
+      {
+        "id": "e7e50c5f-2c87-4428-90c1-ad30e71f127a",
+        "type": "Texto",
+        "label": "Conductor",
+        "value": null
+      },
+      {
+        "id": "0a417ea9-359b-4ffd-93fb-6bdce4aba2a5",
+        "type": "Kilometraje",
+        "label": "Kilometraje",
+        "value": null
+      },
+      {
+        "id": "c8ee4c30-d84c-473f-981b-a3e5c6cd5184",
+        "type": "Texto",
+        "label": "Placa",
+        "value": null
+      },
+      {
+        "id": "bc921347-1b06-4230-b570-e87214fe2bcd",
+        "type": "Texto",
+        "label": "Responsable de la Inspeccion",
+        "value": null
+      },
+      {
+        "id": "a9d30b28-cb7e-47cd-a4b4-184fdcf0bbdc",
+        "type": "FechasP",
+        "label": "Fechas",
+        "value": null,
+        "startDate": "",
+        "endDate": ""
+      },
+      {
+        "id": "c1f5822d-3723-4901-9761-14ec74c04f87",
+        "type": "Hora",
+        "label": "Hora de Ingreso",
+        "value": null
+      },
+      {
+        "id": "d3ab5a3d-e1a9-4301-aaa6-be5c06a39401",
+        "type": "Texto",
+        "label": "Empresa",
+        "value": null
+      }
+    ]
+  },
+  {
+    "id": "8e926f60-2981-42b5-940d-c8e3ed576bb4",
+    "name": "Grupo Preestablecido 3",
+    "fields": [
+      {
+        "id": "95aefde3-01bd-46be-8c11-7df7e3c41c4f",
+        "type": "Texto",
+        "label": "Conductor",
+        "value": null
+      },
+      {
+        "id": "e94f1c14-96b0-4893-80a6-c300d35a420d",
+        "type": "Kilometraje",
+        "label": "Kilometraje",
+        "value": null
+      },
+      {
+        "id": "9d92045e-f6b4-431e-9102-c305b92124ca",
+        "type": "Texto",
+        "label": "Placa",
+        "value": null
+      },
+      {
+        "id": "5af786bf-9f3f-4f3f-a6ac-d8be7432c42f",
+        "type": "Texto",
+        "label": "Responsable de la Inspeccion",
+        "value": null
+      },
+      {
+        "id": "29775fd3-61f7-43ce-b35c-d0bf0ae36ed7",
+        "type": "FechasP",
+        "label": "Fechas",
+        "value": null,
+        "startDate": "",
+        "endDate": ""
+      },
+      {
+        "id": "7e317374-46a2-44f9-8e5a-5beb7bbac858",
+        "type": "Hora",
+        "label": "Hora de Ingreso",
+        "value": null
+      },
+      {
+        "id": "8104d564-bdf6-4333-a8f1-5fd0fd66ad08",
+        "type": "Texto",
+        "label": "Empresa",
+        "value": null
+      }
+    ]
   }
-] 
+]
