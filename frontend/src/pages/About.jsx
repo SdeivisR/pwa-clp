@@ -1,8 +1,12 @@
-export default function About() {
+import ColorPalette from "../components/TailwindPalette";
+
+function App() {
   return (
-    <div className="p-8 text-center">
-      <h1 className="text-3xl font-bold text-green-500">Sobre Nosotros</h1>
-      <p className="mt-4 text-gray-700">Esta es la página de información de la PWA</p>
+    <div>
+      <h1 className="text-2xl font-bold mb-6">Tailwind Color Palette</h1>
+      <ColorPalette />
     </div>
-  )
+  );
 }
+
+export default App;

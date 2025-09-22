@@ -2,11 +2,19 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, Trash2 } from "lucide-react";
-import AddFieldSelector from "../components/AddFieldSelector";
+import { ArrowUp, ArrowDown, Trash2, Plus,FileText,Save,Move,Settings,FilePlus } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import InputModal from "../components/InputModal";
+import AddFieldSelector from "../components/AddFieldSelector";
+import OverwriteModal from "../components/OverwriteModal";
+import Banner from "../components/Banner";
+import Spinner from "../components/Spinner";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+
+
 
 // 📌 Campos predefinidos
 const PREDEFINED_FIELDS = [
@@ -22,17 +30,30 @@ const PREDEFINED_FIELDS = [
 export default function ChecklistTemplateBuilder() {
   const [groups, setGroups] = useState([]);
   const [moveMode, setMoveMode] = useState(false);
-  const { filename } = useParams();
-  const [script, setScript] = useState(null);
   const [error, setError] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [estructura, setEstructura] = useState({ grupos: [] });
+  const location = useLocation();
+  const [plantillas, setPlantillas] = useState([]);
+  const [overwriteModalVisible, setOverwriteModalVisible] = useState(false);
+  const [plantillaSeleccionada, setPlantillaSeleccionada] = useState(null);
+  const [banner, setBanner] = useState(null);
+  const [bannerType, setBannerType] = useState("success");
+  const [loading, setLoading] = useState(false);
+  const id = location.state?.id;
+  const userRole = "Desarrollador";///Solo x ahora 
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    setEstructura({ grupos: groups });
+  }, [groups]);
 
   // ➕ Crear grupo vacío
   const addGroup = () => {
     const id = uuidv4();
-    setGroups((prev) => [
-      ...prev,
-      { id, name: `Grupo ${prev.length + 1}`, fields: [] },
-    ]);
+    const newGroup = { id, name: `Grupo ${groups.length + 1}`, fields: [] };
+    const newGroups = [...groups, newGroup];
+    setGroups(newGroups); // estructura se actualizará por useEffect
   };
 
   // ➕ Crear grupo con campos predefinidos
@@ -44,22 +65,23 @@ export default function ChecklistTemplateBuilder() {
       label: f.label,
       value: null,
       ...(f.type === "FechasP" ? { startDate: "", endDate: "" } : {}),
-     
     }));
 
-    setGroups((prev) => [
-      ...prev,
+    const newGroups = [
+      ...groups,
       {
         id,
-        name: `Grupo Preestablecido ${prev.length + 1}`,
+        name: `Grupo Preestablecido ${groups.length + 1}`,
         fields: fieldsWithIds,
       },
-    ]);
+    ];
+    setGroups(newGroups);
   };
 
   // ➖ Eliminar grupo
   const removeGroup = (groupIndex) => {
-    setGroups((prev) => prev.filter((_, i) => i !== groupIndex));
+    const newGroups = groups.filter((_, i) => i !== groupIndex);
+    setGroups(newGroups);
   };
 
   // ➕ Agregar campo
@@ -72,16 +94,27 @@ export default function ChecklistTemplateBuilder() {
       ...(type === "FechasP" ? { startDate: "", endDate: "" } : {}),
       ...(type === "Checkbox" ? { cB: null } : {}),
       ...(type === "Texto + Si/No" ? { cB: null } : {}),
+      ...(type === "Firma + Texto" ? { com: null } : {}),
+
     };
-    const updated = [...groups];
-    updated[groupIndex].fields.push(newField);
-    setGroups(updated);
+    const newGroups = groups.map((g, i) =>
+      i === groupIndex ? { ...g, fields: [...g.fields, newField] } : g
+    );
+
+    setGroups(newGroups);
+
+    setBanner(`${type} ha sido añadido`);
+    setBannerType("success");
+    setTimeout(() => setBanner(null), 1500);
   };
 
   // ✏️ Actualizar campo
   const updateField = (groupIndex, fieldIndex, updatedField) => {
-    const newGroups = [...groups];
-    newGroups[groupIndex].fields[fieldIndex] = updatedField;
+    const newGroups = groups.map((g, i) =>
+      i === groupIndex
+        ? { ...g, fields: g.fields.map((f, fi) => (fi === fieldIndex ? updatedField : f)) }
+        : g
+    );
     setGroups(newGroups);
   };
 
@@ -94,28 +127,116 @@ export default function ChecklistTemplateBuilder() {
 
   // ➖ Eliminar campo
   const removeField = (groupIndex, fieldIndex) => {
-    const updated = [...groups];
-    updated[groupIndex].fields.splice(fieldIndex, 1);
-    setGroups(updated);
+    const newGroups = groups.map((g, i) =>
+      i === groupIndex ? { ...g, fields: g.fields.filter((_, fi) => fi !== fieldIndex) } : g
+    );
+    setGroups(newGroups);
   };
 
   // 💾 Guardar
-  const saveTemplate = () => {
-    const updated = { ...script, groups };
-    localStorage.setItem("checklistTemplate", JSON.stringify(updated, null, 2));
-    alert("✅ Plantilla guardada en localStorage");
-  };
+  const saveTemplate = async (datos) => {
+    try {
+      // Validaciones
+      if (!datos.titulo || !datos.descripcion) {
+        throw new Error("Debe ingresar título y descripción");
+      }
 
+      const response = await fetch("http://localhost:3000/api/plantillas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          titulo: datos.titulo,
+          descripcion: datos.descripcion,
+          estructura_json: groups
+        }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Error en servidor (${response.status}): ${text}`);
+      }
+
+      const result = await response.json();
+        setBanner("✅ Realizado Correctamente");
+            setBannerType("success");
+            setTimeout(() => {
+              setBanner(null);
+              setLoading(true);
+              setTimeout(() => {
+                setLoading(false);
+                navigate("/gPlant");
+              }, 500);
+            }, 1000);
+            return result;
+          } catch (error) {
+            setBanner(`❌ ${error.message}`);
+            setBannerType("error");
+            setTimeout(() => {
+              setBanner(null);
+            }, 1000);
+
+            throw error;
+          }
+        };
+
+
+  //Metodo para sobreescribir
+  const overwriteTemplate = async (datos) => {
+    try {
+      if (!datos.titulo || !datos.descripcion) {
+        throw new Error("Debe ingresar título y descripción");
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/api/plantillas/${plantillaSeleccionada.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            titulo: datos.titulo,
+            descripcion: datos.descripcion,
+            estructura_json: groups,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Error en servidor (${response.status}): ${text}`);
+      }
+
+      const result = await response.json();
+        setBanner("✅ Realizado Correctamente");
+          setBannerType("success");
+          setTimeout(() => {
+            setBanner(null);
+            setLoading(true);
+            setTimeout(() => {
+              setLoading(false);
+              navigate("/gPlant");
+            }, 500);
+          }, 1000);
+          return result;
+        } catch (error) {
+          setBanner(`❌ ${error.message}`);
+          setBannerType("error");
+          setTimeout(() => {
+            setBanner(null);
+          }, 1000);
+          throw error;
+        }
+      };
   // 🔄 Mover grupo
   const moveGroup = (index, direction) => {
-    const updated = [...groups];
+    const newGroups = [...groups];
     if (direction === "up" && index > 0) {
-      [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+      [newGroups[index - 1], newGroups[index]] = [newGroups[index], newGroups[index - 1]];
+      setGroups(newGroups);
     }
-    if (direction === "down" && index < updated.length - 1) {
-      [updated[index + 1], updated[index]] = [updated[index], updated[index + 1]];
+    if (direction === "down" && index < newGroups.length - 1) {
+      [newGroups[index + 1], newGroups[index]] = [newGroups[index], newGroups[index + 1]];
+      setGroups(newGroups);
     }
-    setGroups(updated);
   };
 
   // 🔄 Drag & Drop
@@ -150,43 +271,173 @@ export default function ChecklistTemplateBuilder() {
       return newGroups;
     });
   };
-// 📂 Cargar script al inicio
-useEffect(() => {
-  if (!filename) return;
+  //Banners para botones
+  const showBanner = (message, type = "info") => {
+  setBanner(message);
+  setBannerType(type);
+  setTimeout(() => setBanner(null), 1500);
+};
+  useEffect(() => {
+    if (!id) {
+      // 🔹 si no hay id en la URL, limpiamos todo
+      setPlantillaSeleccionada(null);
+      setGroups([]);
+      return;
+    }
+    fetch("http://localhost:3000/api/plantillas")
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Error al obtener plantillas (${res.status}): ${text}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setPlantillas(data);
 
-  const file = decodeURIComponent(filename);
+        let plantilla;
 
-  fetch(`/data/${file}`)
-    .then((res) => {
-      if (!res.ok) throw new Error("No se encontró el archivo");
-      return res.json();
-    })
-    .then((json) => {
-      setScript(json);
-      if (Array.isArray(json)) {
-        setGroups(json);
-      } else if (json.groups) {
-        setGroups(json.groups);
-      }
-    })
-    .catch((err) => setError(`Error al cargar el script: ${err.message}`));
-}, [filename]);
+        if (id) {
+          // 🔎 Buscar plantilla con ese id
+          plantilla = data.find((p) => String(p.id) === String(id));
+          if (!plantilla) {
+            setError(`Plantilla con id ${id} no encontrada`);
+            setGroups([]);
+            return; // no seguimos si no existe
+          }
+          setPlantillaSeleccionada(plantilla); // ✅ solo si existe
+        } else {
+          // Si no hay id, tomar la primera (opcional)
+          plantilla = data[0] || null;
+          if (plantilla) {
+            setPlantillaSeleccionada(plantilla);
+          }
+        }
 
+        if (plantilla?.estructura_json) {
+          try {
+            let parsed = plantilla.estructura_json;
 
+            // 👇 Si viene como string desde la BD, parseamos
+            if (typeof parsed === "string") {
+              parsed = JSON.parse(parsed);
+            }
+
+            const grupos = Array.isArray(parsed)
+              ? parsed
+              : Array.isArray(parsed.grupos)
+              ? parsed.grupos
+              : [];
+
+            setGroups(grupos);
+          } catch (err) {
+            setError("Error al parsear estructura_json");
+            console.error(
+              "❌ Error al parsear estructura_json:",
+              err,
+              plantilla.estructura_json
+            );
+            setGroups([]);
+          }
+        } else {
+          setGroups([]);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(`Error al cargar las plantillas: ${err.message}`);
+        setGroups([]);
+      });
+  }, [id]);
   return (
+    
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Constructor de Checklist</h1>
 
       {/* Botones */}
-      <div className="flex gap-2 items-center mb-2">
-        <Button onClick={addGroup}>➕ Nuevo Grupo</Button>
-        <Button onClick={addPredefinedGroup}>📂 Preestablecidos</Button>
-        <Button onClick={saveTemplate}>💾 Guardar</Button>
-        <Button variant="outline" onClick={() => setMoveMode(!moveMode)}>
+      <div className="flex flex-wrap gap-3 items-center mb-4 p-3 bg-gray-50 rounded-lg shadow-sm">
+        <Button
+          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+          onClick={() => {
+            addGroup();
+            showBanner("Nuevo grupo creado", "success");
+          }}
+        >
+          <Plus className="w-5 h-5" />
+          Nuevo Grupo
+        </Button>
+        <Button
+        className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+        onClick={() => {
+          addPredefinedGroup();
+          showBanner("Grupo preestablecido agregado", "info");
+        }}
+        >
+          <FileText className="w-5 h-5" />
+          Preestablecidos
+        </Button>
+        <Button
+          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+          onClick={() => {
+            if (id) {
+              setPlantillaSeleccionada({
+                id,
+                titulo: plantillaSeleccionada?.titulo,
+                descripcion: plantillaSeleccionada?.descripcion,
+              });
+              setOverwriteModalVisible(true);
+            } else {
+              setModalVisible(true);
+            }
+          }}
+        >
+          <Save className="w-5 h-5" />
+          {id ? "Sobreescribir" : "Guardar"}
+        </Button>
+        <Button
+          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+          onClick={() => {
+            setMoveMode(!moveMode);
+            showBanner(
+              !moveMode ? "Activado modo edición" : "Activado modo movimiento",
+              "info"
+            );
+          }}
+        >
+          <Move className="w-5 h-5" />
           {moveMode ? "Modo Edición" : "Modo Movimiento"}
         </Button>
-      </div>
+        <Button
+          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+          onClick={() => {
+            setLoading(true); // 🔹 activar spinner
+            setTimeout(() => {
+              setPlantillaSeleccionada(null);
+              setGroups([]);
+              setLoading(false); 
+              navigate("/cPlant"); // limpiar URL
+            }, 100);
+          }}
+        >
+          <FilePlus className="w-5 h-5" />
+          Crear Nuevo Checklist
+        </Button>
+        <Button
+          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+          onClick={() => {
+            setLoading(true); // 🔹 activar spinner
+            setTimeout(() => {
+              setLoading(false); 
+              navigate("/gPlant");
+            }, 100); // 🔹 espera 0.5s
+          }}
+        >
+          <Settings className="w-5 h-5" />
+          Gestionar Plantillas
+        </Button>
 
+
+      </div>
       {/* Grupos */}
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="space-y-4">
@@ -268,16 +519,45 @@ useEffect(() => {
           ))}
         </div>
       </DragDropContext>
-
+      {modalVisible && (
+        <InputModal
+          onClose={() => setModalVisible(false)} // para cerrar el modal desde adentro
+          onSave={(titulo, descripcion) => {
+            saveTemplate(titulo, descripcion); // llama a tu función
+            setModalVisible(false); // cerrar luego de guardar
+          }}
+        />
+      )}
+      {overwriteModalVisible && (
+        <OverwriteModal
+          plantilla={plantillaSeleccionada}
+          onClose={() => setOverwriteModalVisible(false)}
+          onOverwrite={(datos) => {
+            overwriteTemplate(datos); // PUT
+            setOverwriteModalVisible(false);
+          }}
+        />
+      )}
+      {banner && (
+        <Banner
+          message={banner}
+          type={bannerType}
+          onClose={() => setBanner(null)}
+        />
+      )}
+      {loading && <Spinner />}
+        {banner && <Banner message={banner} type={bannerType} onClose={() => setBanner(null)} />}
       {/* Debug opcional */}
       {error && <div className="p-4 bg-red-100 text-red-700 rounded">{error}</div>}
 
-      <div className="mt-6">
-        <h2 className="text-lg font-semibold mb-2">Vista previa JSON</h2>
-        <pre className="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto">
-          {JSON.stringify(groups, null, 2)}
-        </pre>
-      </div>
+      {userRole === "Desarrollador" && (
+        <div className="mt-6">
+          <h2 className="text-lg font-semibold mb-2">Vista previa JSON</h2>
+          <pre className="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto">
+            {JSON.stringify(groups, null, 2)}
+          </pre>
+        </div>
+      )}
     </div>
   );
 }

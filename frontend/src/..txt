@@ -1,33 +1,52 @@
-const handleInputChange = (fieldId, value) => {
-  setFormData(prevData => ({
-    ...prevData,
-    [fieldId]: value
-  }));
-  setSelectedTemplate(prev => {
-    if (!prev) return prev;
-    return {
-      ...prev,
-      fields: (prev.fields || []).map(group => ({
-        ...group,
-        fields: (group.fields || []).map(field =>
-          field.id === fieldId ? { ...field, value } : field
-        )
-      }))
-    };
-  });
-};
+useEffect(() => {
+  if (!id) {
+    // 🔹 si no hay id en la URL, limpiamos todo
+    setPlantillaSeleccionada(null);
+    setGroups([]);
+    return;
+  }
 
-const handleCheckboxChange = (fieldId, newValue) => {
-  setSelectedTemplate(prev => {
-    if (!prev) return prev;
-    return {
-      ...prev,
-      fields: (prev.fields || []).map(group => ({
-        ...group,
-        fields: (group.fields || []).map(field =>
-          field.id === fieldId ? { ...field, cB: newValue } : field
-        )
-      }))
-    };
-  });
-};
+  // 🔹 caso normal: cargar plantillas
+  fetch("http://localhost:3000/api/plantillas")
+    .then(async (res) => {
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Error al obtener plantillas (${res.status}): ${text}`);
+      }
+      return res.json();
+    })
+    .then((data) => {
+      const plantilla = data.find((p) => String(p.id) === String(id));
+
+      if (!plantilla) {
+        setError(`Plantilla con id ${id} no encontrada`);
+        setPlantillaSeleccionada(null);
+        setGroups([]);
+        return;
+      }
+
+      setPlantillaSeleccionada(plantilla);
+
+      try {
+        let parsed = plantilla.estructura_json;
+        if (typeof parsed === "string") parsed = JSON.parse(parsed);
+
+        const grupos = Array.isArray(parsed)
+          ? parsed
+          : Array.isArray(parsed.grupos)
+          ? parsed.grupos
+          : [];
+
+        setGroups(grupos);
+      } catch (err) {
+        setError("Error al parsear estructura_json");
+        console.error("❌ Error:", err, plantilla.estructura_json);
+        setGroups([]);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      setError(`Error al cargar las plantillas: ${err.message}`);
+      setGroups([]);
+    });
+}, [id]);

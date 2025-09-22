@@ -1,0 +1,23 @@
+const saveTemplate = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/api/plantillas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        titulo: "Plantilla Deiv",
+        descripcion: "Plantilla creada por Deiv",
+        estructura_json: estructura, // tu objeto JSON con la estructura
+        creado_por: 7
+      })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log("✅ Plantilla guardada:", data);
+    } else {
+      console.error("❌ Error al guardar plantilla:", data);
+    }
+  } catch (error) {
+    console.error("❌ Error de conexión:", error);
+  }
+};

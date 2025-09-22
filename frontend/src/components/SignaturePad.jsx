@@ -79,31 +79,31 @@ const SignaturePad = ({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex items-center gap-1 text-gray-600 hover:text-red-600"
-          title="Cerrar"
-        >
-          <X className="w-5 h-5" /> Cerrar
-        </button>
+      <div className="flex items-center justify-end mb-2">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={clearCanvas}
-            className="flex items-center gap-1 text-gray-600 hover:text-red-600"
+            className="p-2 rounded-full hover:bg-gray-100 text-red-600 hover:text-red-900"
             title="Borrar"
           >
-            <Trash2 className="w-5 h-5" /> Borrar
+            <Trash2 className="w-5 h-5" />
           </button>
           <button
             type="button"
             onClick={saveSignature}
-            className="flex items-center gap-1 text-green-700 hover:text-green-900 font-medium"
+            className="p-2 rounded-full hover:bg-gray-100 text-green-600 hover:text-green-900"
             title="Guardar"
           >
-            <Save className="w-5 h-5" /> Guardar
+            <Save className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="p-2 rounded-full hover:bg-gray-100 text-red-600 hover:text-red-900"
+            title="Cerrar"
+          >
+            <X className="w-5 h-5" /> 
           </button>
         </div>
       </div>

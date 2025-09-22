@@ -77,7 +77,7 @@ export default function Navbar() {
   const debouncedSearchValue = useDebounce(searchValue, 300);
 
   // Filtra items en búsqueda
-  useEffect(() => {
+    useEffect(() => {
     if (debouncedSearchValue.length > 0) {
       setLoading(true);
       setTimeout(() => {
