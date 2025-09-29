@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { UserContext } from "../context/UserContext";
+
+
 
 export default function Register() {
   const [step, setStep] = useState(1);
@@ -8,6 +12,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const { user, setUser } = useContext(UserContext);
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -68,31 +73,29 @@ export default function Register() {
   };
 
   // Paso 2b: login
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setMessage("");
 
-    try {
-      const res = await fetch("http://localhost:3000/api/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password
-          }), 
-      });
-      const data = await res.json();
+const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const res = await fetch("http://localhost:3000/api/users/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: formData.email, password: formData.password }),
+    });
+    const data = await res.json();
 
-      if (res.ok) {
-        setMessage("Inicio de sesión exitoso ✅");
-        navigate("/"); 
-      } else {
-        setMessage(data.error || "Credenciales inválidas");
-      }
-    } catch {
-      setMessage("Error de conexión con el servidor");
-    }
-  };
+    console.log("📦 Respuesta cruda del backend:", data); // 👈 MUY IMPORTANTE
+
+    if (!res.ok) throw new Error(data.message || "Error de login");
+    localStorage.setItem("usuario", JSON.stringify(data.user));
+    console.log("📦 Usuario guardado en localStorage:", data.user);
+    setUser(data.user);
+    navigate("/home");
+  } catch (err) {
+    setMessage(err.message || "Error al iniciar sesión");
+  }
+};
+
 
 return (
   <div

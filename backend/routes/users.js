@@ -81,4 +81,36 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// 📌 Obtener todos los usuarios
+router.get("/", async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+  SELECT u.id, u.nombre, u.email, u.rol_id, r.rol_nombre
+  FROM usuarios u
+  LEFT JOIN roles r ON u.rol_id = r.id
+`);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error al obtener usuarios:", error);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [result] = await db.query("DELETE FROM usuarios WHERE id = ?", [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    res.json({ mensaje: "Usuario eliminado correctamente" });
+  } catch (err) {
+    console.error("❌ Error eliminando usuario:", err);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+
 module.exports = router;

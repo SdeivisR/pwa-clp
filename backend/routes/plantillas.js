@@ -2,7 +2,17 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
-// 📌 Crear una nueva plantilla
+const generarCodigo = (titulo) => {
+  if (!titulo) return null;
+  return titulo
+    .split(" ")
+    .map(word => word[0])   // primera letra de cada palabra
+    .join("")
+    .toUpperCase()
+    .slice(0, 4);           // máximo 4 caracteres
+};
+
+
 router.post("/", async (req, res) => {
   try {
     const { titulo, descripcion, estructura_json, creado_por } = req.body;
@@ -11,16 +21,25 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Título y estructura_json son obligatorios" });
     }
 
+    // 🔹 Generar código a partir del título
+    const codigo = titulo
+      .split(" ")
+      .map(word => word[0])   // primera letra de cada palabra
+      .join("")
+      .toUpperCase()
+      .slice(0, 4);           // máximo 4 caracteres
+
     const fecha = new Date().toISOString();
 
     const [result] = await pool.query(
-      "INSERT INTO plantillas (titulo, descripcion, estructura_json, creado_por, fecha_creacion, fecha_modificacion) VALUES (?, ?, ?, ?, ?, ?)",
-      [titulo, descripcion, JSON.stringify(estructura_json), creado_por, fecha, fecha]
+      "INSERT INTO plantillas (titulo, codigo, descripcion, estructura_json, creado_por, fecha_creacion, fecha_modificacion) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [titulo, codigo, descripcion, JSON.stringify(estructura_json), creado_por, fecha, fecha]
     );
 
     res.status(201).json({ 
       message: "Plantilla creada con éxito", 
       id: result.insertId,
+      codigo,
       fecha_creacion: fecha,
       fecha_modificacion: fecha
     });
@@ -58,22 +77,23 @@ router.put("/:id/full", async (req, res) => {
 
   try {
     const fecha = new Date().toISOString();
+    const codigo = generarCodigo(titulo);
+
     const [result] = await pool.query(
-      "UPDATE plantillas SET titulo = ?, descripcion = ?, estructura_json = ?, fecha_modificacion = ? WHERE id = ?",
-      [titulo, descripcion, JSON.stringify(estructura_json || {}), fecha, id]
+      "UPDATE plantillas SET titulo = ?, codigo = ?, descripcion = ?, estructura_json = ?, fecha_modificacion = ? WHERE id = ?",
+      [titulo, codigo, descripcion, JSON.stringify(estructura_json || {}), fecha, id]
     );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Plantilla no encontrada" });
     }
 
-    res.json({ mensaje: "Plantilla actualizada correctamente" });
+    res.json({ mensaje: "Plantilla actualizada correctamente", codigo });
   } catch (err) {
     console.error("❌ Error en PUT /plantillas/:id/full:", err);
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
-
 // PUT /api/plantillas/:id
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
@@ -85,18 +105,20 @@ router.put("/:id", async (req, res) => {
 
   try {
     const fecha = new Date().toISOString();
+    const codigo = generarCodigo(titulo);
+
     const [result] = await pool.query(
       `UPDATE plantillas
-       SET titulo = ?, descripcion = ?, estructura_json = ?, fecha_modificacion = ?
+       SET titulo = ?, codigo = ?, descripcion = ?, estructura_json = ?, fecha_modificacion = ?
        WHERE id = ?`,
-      [titulo, descripcion, JSON.stringify(estructura_json), fecha, id]
+      [titulo, codigo, descripcion, JSON.stringify(estructura_json), fecha, id]
     );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Plantilla no encontrada" });
     }
 
-    res.json({ mensaje: "Plantilla actualizada correctamente", id });
+    res.json({ mensaje: "Plantilla actualizada correctamente", id, codigo });
   } catch (err) {
     console.error("❌ Error al actualizar plantilla:", err);
     res.status(500).json({ error: "Error en el servidor" });

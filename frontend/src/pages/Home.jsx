@@ -1,8 +1,11 @@
-export default function Home() {
+  // src/pages/Soporte.jsx
+export default function Soporte() {
   return (
-    <div className="p-8 text-center">
-      <h1 className="text-4xl font-bold text-blue-500">Bienvenido a la PWA</h1>
-      <p className="mt-4 text-lg text-gray-700">Página de inicio con Tailwind funcionando</p>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold">Soporte / Contacto</h1>
+      <p className="mt-4">
+        Aquí puedes colocar la información de contacto, correos o formulario de soporte.
+      </p>
     </div>
-  )
+  );
 }

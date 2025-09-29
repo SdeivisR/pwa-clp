@@ -1,13 +1,15 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Navbar.css";
 import UserMenu from "./UserMenu";
+import { UserContext } from "../context/UserContext";
 import {
   ChevronRight,
   ChevronDown,
   Search,
   X,
   Loader,
+  UserCircle2,
 } from "lucide-react";
 
 // Datos de ejemplo para la búsqueda (en un proyecto real vendría de una API)
@@ -43,6 +45,7 @@ export default function Navbar() {
   const [loading, setLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const { user, logout } = useContext(UserContext);
 
   const menuRef = useRef(null);
   const checklistMenuRef = useRef(null);
@@ -64,14 +67,7 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Simulación de usuario autenticado
-  const [user] = useState({
-    isLoggedIn: true,
-    name: "Deiv",
-    email: "sdeivisr@gmail.com",
-    profilePic: "https://placehold.co/100x100/0D0D0D/FFFFFF?text=DS",
-    role: "admin",
-  });
+
 
   // Debounce para búsqueda
   const debouncedSearchValue = useDebounce(searchValue, 300);
@@ -205,7 +201,7 @@ export default function Navbar() {
 
               <li>
                 <Link
-                  to="/"
+                  to="/Home"
                   className="hover:text-gray-600 text-xl"
                 >
                   Home
@@ -271,17 +267,21 @@ export default function Navbar() {
               </li>
             </ul>
             <div className="relative w-10 h-10">
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors duration-200"
-              >
-                {user.isLoggedIn ? (
-                  <img src={user.profilePic} alt="Perfil de usuario" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <UserCircle2 size={24} />
-                )}
-              </button>
-
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white 
+                        bg-gradient-to-br from-blue-600 to-blue-800 shadow-md hover:shadow-lg transition-all duration-300"
+            >
+              {user?.profilePic ? (
+                <img
+                  src={user.profilePic}
+                  alt="Perfil de usuario"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                user?.nombre?.charAt(0).toUpperCase() || <UserCircle2 size={24} />
+              )}
+            </button>
             {showUserMenu && (
               <UserMenu
                 ref={menuRef}
@@ -306,16 +306,20 @@ export default function Navbar() {
           </div>
           <div className="hidden [@media(max-width:765px)]:flex  relative w-10 h-10">
             <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors duration-200"
-              >
-                {user.isLoggedIn ? (
-                  <img src={user.profilePic} alt="Perfil de usuario" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <UserCircle2 size={24} />
-                )}
-              </button>
-
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white 
+                        bg-gradient-to-br from-blue-600 to-blue-800 shadow-md hover:shadow-lg transition-all duration-300"
+            >
+              {user?.profilePic ? (
+                <img
+                  src={user.profilePic}
+                  alt="Perfil de usuario"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                user?.nombre?.charAt(0).toUpperCase() || <UserCircle2 size={24} />
+              )}
+            </button>
             {showUserMenu && (
               <UserMenu
                 user={user}

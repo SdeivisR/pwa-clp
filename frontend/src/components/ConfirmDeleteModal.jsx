@@ -20,7 +20,7 @@ export default function ConfirmDeleteModal({
         </p>
 
         <p className="mb-6 text-sm text-red-600">
-          <strong>Esto no se puede deshacer.</strong> La plantilla se eliminará permanentemente.
+          <strong>Esto no se podra deshacer.</strong> "{itemName}" Se eliminará permanentemente.
         </p>
 
         <div className="flex justify-end gap-3">

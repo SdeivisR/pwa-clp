@@ -1,5 +1,5 @@
 // src/pages/cPlant.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowUp, ArrowDown, Trash2, Plus,FileText,Save,Move,Settings,FilePlus } from "lucide-react";
@@ -12,7 +12,8 @@ import OverwriteModal from "../components/OverwriteModal";
 import Banner from "../components/Banner";
 import Spinner from "../components/Spinner";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { UserContext } from "../context/UserContext";
+
 
 
 
@@ -41,7 +42,7 @@ export default function ChecklistTemplateBuilder() {
   const [bannerType, setBannerType] = useState("success");
   const [loading, setLoading] = useState(false);
   const id = location.state?.id;
-  const userRole = "Desarrollador";///Solo x ahora 
+  const { user } = useContext(UserContext);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -147,7 +148,8 @@ export default function ChecklistTemplateBuilder() {
         body: JSON.stringify({
           titulo: datos.titulo,
           descripcion: datos.descripcion,
-          estructura_json: groups
+          estructura_json: groups,
+          creado_por: user?.id ?? null  
         }),
       });
 
@@ -359,6 +361,21 @@ export default function ChecklistTemplateBuilder() {
         <Button
           className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
           onClick={() => {
+            setLoading(true); // 🔹 activar spinner
+            setTimeout(() => {
+              setPlantillaSeleccionada(null);
+              setGroups([]);
+              setLoading(false); 
+              navigate("/cPlant"); // limpiar URL
+            }, 100);
+          }}
+        >
+          <FilePlus className="w-5 h-5" />
+          Crear Nueva Plantilla
+        </Button>
+        <Button
+          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+          onClick={() => {
             addGroup();
             showBanner("Nuevo grupo creado", "success");
           }}
@@ -406,21 +423,6 @@ export default function ChecklistTemplateBuilder() {
         >
           <Move className="w-5 h-5" />
           {moveMode ? "Modo Edición" : "Modo Movimiento"}
-        </Button>
-        <Button
-          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
-          onClick={() => {
-            setLoading(true); // 🔹 activar spinner
-            setTimeout(() => {
-              setPlantillaSeleccionada(null);
-              setGroups([]);
-              setLoading(false); 
-              navigate("/cPlant"); // limpiar URL
-            }, 100);
-          }}
-        >
-          <FilePlus className="w-5 h-5" />
-          Crear Nuevo Checklist
         </Button>
         <Button
           className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
@@ -550,7 +552,7 @@ export default function ChecklistTemplateBuilder() {
       {/* Debug opcional */}
       {error && <div className="p-4 bg-red-100 text-red-700 rounded">{error}</div>}
 
-      {userRole === "Desarrollador" && (
+      {user?.rol_id === 3 && (
         <div className="mt-6">
           <h2 className="text-lg font-semibold mb-2">Vista previa JSON</h2>
           <pre className="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto">

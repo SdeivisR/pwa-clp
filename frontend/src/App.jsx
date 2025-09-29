@@ -11,9 +11,12 @@ import UsersPage from "./pages/Users";
 import NCheck from "./pages/nCheck";
 import CPlant from "./pages/cPLant";
 import GPlant from "./pages/gPLant";
+import HCheck from "./pages/hCheck";
 import Register from "./pages/Register";
 import ChecklistTemplateBuilder from "./pages/cPlant";
 import MainLayout from "./pages/MainLayout";
+
+
 
 
 
@@ -22,10 +25,10 @@ export default function App() {
     <Router>
       <div className="relative min-h-screen">
 
-        <main className="p-4">
+        <main>
           <Routes>
-            <Route path="/Register" element={<Register />} />
-            <Route path="/"element={<MainLayout><Home/></MainLayout>}/>
+            <Route path="/" element={<Register />} />
+            <Route path="/Home"element={<MainLayout><Home/></MainLayout>}/>
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/soporte" element={<Soporte />} />
@@ -33,8 +36,9 @@ export default function App() {
             <Route path="/configuracion" element={<Configuracion />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/nCheck" element={<MainLayout><NCheck/></MainLayout>} />
-            <Route path="/cPlant" element={<CPlant />} />
+            <Route path="/cPlant" element={<MainLayout><CPlant/></MainLayout>} />
             <Route path="/gPlant" element={<MainLayout><GPlant/></MainLayout>} />
+            <Route path="/hCheck" element={<MainLayout><HCheck/></MainLayout>} />
             <Route path="/cplant/:filename" element={<ChecklistTemplateBuilder />} />
 
 

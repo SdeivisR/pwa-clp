@@ -1,6 +1,6 @@
 // src/pages/NCheck.jsx
-import { useState, useEffect  } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useContext } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { RefreshCw, Trash2, Loader2, Save, FileText, FilePlus, FolderPlus } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import TemplatesModal from "../components/TemplatesModal";
@@ -9,6 +9,7 @@ import { Checkbox } from "../components/ui/checkbox";
 import { Textarea } from "../components/ui/textarea";
 import SignaturePad from "@/components/SignaturePad"; 
 import Spinner from "../components/Spinner";
+import { UserContext } from "../context/UserContext";
 
 
 //Funciones 
@@ -25,7 +26,7 @@ import Spinner from "../components/Spinner";
               <label
                 className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
                   ${value === "si" ? "bg-green-100 border border-green-400" : "hover:bg-gray-100"}`}
-                onClick={() => updateFieldValue(field.id, { cB: "si" })}
+                onClick={() => updateFieldValue(field.id, { ...field, cB: "si" })}
               >
                 <Checkbox checked={value === "si"} readOnly />
                 <span className="text-gray-700 font-medium">Sí</span>
@@ -34,7 +35,7 @@ import Spinner from "../components/Spinner";
               <label
                 className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
                   ${value === "no" ? "bg-red-100 border border-red-400" : "hover:bg-gray-100"}`}
-                onClick={() => updateFieldValue(field.id, { cB: "no" })}
+                onClick={() => updateFieldValue(field.id, { ...field, cB: "no" })}
               >
                 <Checkbox checked={value === "no"} readOnly />
                 <span className="text-gray-700 font-medium">No</span>
@@ -43,7 +44,9 @@ import Spinner from "../components/Spinner";
 
             <Input
               value={textValue}
-              onChange={(e) => updateFieldValue(field.id, { value: e.target.value })}
+              onChange={(e) =>
+                updateFieldValue(field.id, { ...field, value: e.target.value })
+              }
               placeholder="Escribe aquí..."
               className="rounded-xl border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition mt-2 px-3 py-2"
             />
@@ -53,12 +56,13 @@ import Spinner from "../components/Spinner";
 
     // CheckboxField.jsx
       function CheckboxField({ field, handleChange }) {
-        const value = field.cB ?? ""; // ✅ Usar la propiedad correcta
+        const value = field.cB ?? ""; 
 
-        return (
+      return (
           <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
             <span className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</span>
             <div className="flex items-center gap-4 sm:gap-6">
+              {/* Opción Sí */}
               <label
                 className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
                   ${value === "si" ? "bg-green-100 border border-green-400" : "hover:bg-gray-100"}`}
@@ -68,6 +72,7 @@ import Spinner from "../components/Spinner";
                 <span className="text-gray-700 font-medium">Sí</span>
               </label>
 
+              {/* Opción No */}
               <label
                 className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
                   ${value === "no" ? "bg-red-100 border border-red-400" : "hover:bg-gray-100"}`}
@@ -82,6 +87,7 @@ import Spinner from "../components/Spinner";
       }
 
 
+
 export default function NCheck() {
   const navigate = useNavigate();
   const [selectedTemplate, setSelectedTemplate] = useState({ fields: [], estructura_json: []  });
@@ -93,6 +99,12 @@ export default function NCheck() {
   const [modalOpen, setModalOpen] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const [loading, setLoading] = useState(false);
+  const { user } = useContext(UserContext);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const location = useLocation();
+  const checklistId = location.state?.checklistId;
+  const [checklist, setChecklist] = useState(null);
+
 
 
   useEffect(() => {
@@ -109,7 +121,7 @@ export default function NCheck() {
     const handleCreateTemplate = () => {
       setLoading(true);
       setTimeout(() => {
-        navigate("/cPlant");
+      navigate("/cPlant");
       }, 300);
     };
     const handleInputChange = (fieldId, value) => {
@@ -234,13 +246,6 @@ export default function NCheck() {
                 ) : null}
             </div>
           );
-      case "Checkbox":
-        return (
-          <CheckboxField
-            field={field}
-            handleChange={handleCheckboxChange}
-          />
-        );
       case "Comentario":
         return (
           <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
@@ -571,11 +576,20 @@ export default function NCheck() {
       case "Recomendación Inteligente (IA)":
         return (
           <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
-            <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
+            <label className="text-base sm:text-lg font-semibold text-gray-800">
+              {field.label}
+            </label>
             <div className="p-3 bg-gray-100 rounded-xl border text-gray-600 italic text-sm sm:text-base">
-              {recommendation || "La IA aún no ha generado una recomendación..."}
+              {recommendation || field.value || "La IA aún no ha generado una recomendación..."}
             </div>
           </div>
+        );
+      case "Checkbox":
+        return (
+          <CheckboxField
+            field={field}
+            handleChange={handleCheckboxChange}
+          />
         );
       case "Texto + Si/No":
         return (
@@ -590,30 +604,105 @@ export default function NCheck() {
     };
 
     //Guardado
-    const handleSave = () => {
-      if (!selectedTemplate) {
-        console.warn("No hay template seleccionado");
-        return;
-      }
+    const handleSave = async () => {
+        if (!selectedTemplate) {
+          alert("No hay plantilla seleccionada");
+          return;
+        }
 
-      // Convierte el objeto en JSON string
-      const dataToSave = JSON.stringify(selectedTemplate, null, 2);
+        // Extraer la placa y conductor del template, si existen
+        const fields = selectedTemplate.estructura_json.flatMap(group => group.fields);
+        const placaField = fields.find(f => f.label === "Placa")?.value ?? null;
+        const conductorField = fields.find(f => f.label === "Conductor")?.value ?? null;
 
-      // 👉 Lo mostramos en consola (para pruebas)
-      console.log("Checklist generado:", dataToSave);
+        try {
+          let vehiculo_id = 1; // fallback si no hay vehículo
 
-      // 👉 También podemos descargarlo como archivo JSON
-      const blob = new Blob([dataToSave], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "checklist.json";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+          // Si tenemos placa o conductor, intentar crear vehículo nuevo o usar existente
+          if (placaField || conductorField) {
+            // Primero podrías buscar en tu backend si ya existe un vehículo con esa placa
+            const resBuscar = await fetch(`http://localhost:3000/api/vehiculos?placa=${placaField}`);
+            const dataBuscar = await resBuscar.json();
+
+            if (dataBuscar && dataBuscar.length > 0) {
+              // Vehículo existe
+              vehiculo_id = dataBuscar[0].id;
+            } else {
+              // Crear nuevo vehículo
+              const resCrear = await fetch("http://localhost:3000/api/vehiculos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  placa: placaField,
+                  conductor: conductorField
+                }),
+              });
+              const dataCrear = await resCrear.json();
+              vehiculo_id = dataCrear.vehiculo_id; // ID del nuevo vehículo
+            }
+          }
+
+          // Crear checklist
+          const checklistToSave = {
+            vehiculo_id,
+            plantilla_id: selectedTemplate.id,
+            contenido_json: JSON.stringify({
+              ...selectedTemplate,
+              placa: placaField,
+              conductor: conductorField,
+              creado_por: user?.name ?? null,
+            }),
+            fecha_creacion: new Date().toISOString(),
+            fecha_salida: null,
+          };
+
+          // Guardar checklist en backend
+          const resChecklist = await fetch("http://localhost:3000/api/checklists", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(checklistToSave),
+          });
+
+          if (!resChecklist.ok) throw new Error("Error al guardar en la base de datos");
+
+          const dataChecklist = await resChecklist.json();
+          console.log("Checklist guardado:", dataChecklist);
+          setTimeout(() => {
+            navigate("/hCheck");
+            }, 300);
+          alert("Checklist guardado correctamente");
+
+        } catch (err) {
+          console.error(err);
+          alert("No se pudo guardar el checklist");
+        }
     };
 
+useEffect(() => {
+  if (checklistId) {
+    const fetchChecklist = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/api/checklists/${checklistId}`);
+        const data = await res.json();
+
+        // Parseamos el JSON que guardaste
+        const contenido = JSON.parse(data.contenido_json);
+
+        // Guardamos en selectedTemplate (esto ya llena el form)
+        setSelectedTemplate({
+          id: data.plantilla_id,
+          titulo: contenido.titulo ?? data.titulo,  
+          estructura_json: contenido.estructura_json ?? [],
+          fields: contenido.fields ?? []
+        });
+      } catch (err) {
+        console.error("Error al cargar checklist:", err);
+      }
+    };
+
+    fetchChecklist();
+  }
+}, [checklistId]);
 
   return (
 
@@ -641,13 +730,14 @@ export default function NCheck() {
         </button>
 
         {/* Guardar borrador */}
-        <button
-          className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
-          onClick={() => alert("Guardar borrador")}
+<button
+  className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
+          onClick={handleSave}
         >
-          <Save className="w-10 h-10 text-yellow-600 mb-3" />
-          <span className="font-medium">Guardar borrador</span>
-        </button>
+          <Save className="w-10 h-10 text-orange-400 mb-3" />
+          <span className="font-medium">Guardar Checklist</span>
+</button>
+
 
         {/* Generar PDF */}
         <button
@@ -714,7 +804,7 @@ export default function NCheck() {
       />  
       
       {loading && <Spinner />}
-      {/*Vista previa del Script*/}
+
       {activeSignatureField && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-lg p-4 w-[92%] max-w-[520px]">
@@ -732,6 +822,7 @@ export default function NCheck() {
           </div>
         </div>
       )}
+      {user?.rol_id === 3 && (
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>📂 Vista previa del Script</CardTitle>
@@ -743,6 +834,7 @@ export default function NCheck() {
 
         </CardContent>
       </Card>
+      )}
 
       
       <form

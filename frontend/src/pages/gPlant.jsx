@@ -148,81 +148,68 @@ export default function GPlant() {
       </div>
 
       {/* 📋 Lista de plantillas */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Plantillas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="text-left border-b">
-                <th className="p-2">Nombre</th>
-                <th className="p-2">Informacion</th>
-                <th className="p-2">Fecha Creada.</th>
-                <th className="p-2">Fecha Modif.</th>
-                <th className="p-2 text-center">Acciones</th>
-              </tr>
-            </thead>
-              <tbody>
-                {plantillas.map((p) => (
-                  <tr key={p.id} className="border-b hover:bg-gray-50">
-                    <td className="p-2">{p.titulo}</td>
-                    <td className="p-2">{p.descripcion}</td>
-                    <td className="p-2">
-                      {new Date(p.fecha_creacion).toLocaleDateString("es-PE")}
-                    </td>
-                    <td className="p-2">
-                      {p.fecha_modificacion
-                        ? new Date(p.fecha_modificacion).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td className="p-2 flex gap-2 justify-center">
-                    <button
-                      onClick={() => openEditModal(p)}
-                      className="p-2 text-blue-600 hover:bg-blue-100 rounded-full"
-                    >
-                      <Info size={18} />
-                    </button>
+<Card>
+  <CardContent>
+    <div className="overflow-x-auto rounded-lg shadow">
+      <table className="w-full border-collapse bg-white">
+        <thead className="bg-gray-100 text-gray-700 uppercase text-sm">
+          <tr>
+            <th className="p-3">Código</th>
+            <th className="p-3">Nombre</th>
+            <th className="p-3 hidden sm:table-cell">Información</th>
+            <th className="p-3 hidden sm:table-cell">Fecha Creada</th>
+            <th className="p-3 hidden sm:table-cell">Fecha Modif.</th>
+            <th className="p-3 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {plantillas.map((p, index) => (
+            <tr
+              key={p.id}
+              className={`border-t ${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}
+            >
+              <td className="p-3 font-semibold text-gray-700">{p.codigo}</td>
+              <td className="p-3 font-medium">{p.titulo}</td>
+              <td className="p-3 hidden sm:table-cell truncate max-w-xs" title={p.descripcion}>
+                {p.descripcion}
+              </td>
+              <td className="p-3 hidden sm:table-cell">
+                {new Date(p.fecha_creacion).toLocaleDateString("es-PE")}
+              </td>
+              <td className="p-3 hidden sm:table-cell">
+                {p.fecha_modificacion
+                  ? new Date(p.fecha_modificacion).toLocaleDateString("es-PE")
+                  : "-"}
+              </td>
+              <td className="p-3 flex gap-2 justify-center flex-wrap">
+                <button
+                  onClick={() => openEditModal(p)}
+                  className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 hover:bg-blue-100 rounded-full transition"
+                >
+                  <Info size={16} /> Ver
+                </button>
+                <button
+                  onClick={() => handleEditPlantilla(p.id)}
+                  className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 hover:bg-green-100 rounded-full transition"
+                >
+                  <Edit size={16} /> Editar
+                </button>
+                <button
+                  onClick={() => openDeleteModal(p.id, p.titulo)}
+                  className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 hover:bg-red-100 rounded-full transition"
+                >
+                  <Trash2 size={16} /> Eliminar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </CardContent>
+</Card>
 
-                      <button
-                        onClick={() => openDeleteModal(p.id, p.titulo)}
-                        className="p-2 text-red-600 hover:bg-red-100 rounded-full"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleEditPlantilla(p.id)}
-                        className="p-2 text-green-600 hover:bg-blue-100 rounded-full"
-                      >
-                        <Edit size={18} />
-                      </button>
 
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-          </table>
-        </CardContent>
-      </Card>
-
-      {/* 📊 Gráfico de uso de plantillas */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Uso de Plantillas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full h-64">
-            <ResponsiveContainer>
-              <BarChart data={plantillas}>
-                <XAxis dataKey="titulo" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="usos" fill="#2563eb" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
       <ConfirmDeleteModal
         visible={deleteModalVisible}
         onClose={closeDeleteModal}
