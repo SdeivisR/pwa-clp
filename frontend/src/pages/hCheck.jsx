@@ -3,6 +3,8 @@ import { Edit, Trash2, PlusCircle, File, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { generatePDFFromJSON } from "../helpers/generatePDFFromJSON";
+import { generatePDF } from "../utils/pdfGenerator"; 
+
 
 export default function HCheck() {
     const navigate = useNavigate();
@@ -34,19 +36,41 @@ export default function HCheck() {
     navigate("/ncheck", { state: { checklistId: chk.id } });
     };
 
+// en hCheck.jsx o donde lo llamas
 const handleCheckJSON = async (id) => {
   try {
     const response = await fetch(`http://localhost:3000/api/pdf/generate-pdf/${id}`);
     if (!response.ok) throw new Error("Error obteniendo JSON");
 
-    const data = await response.json();
-    console.log("JSON recibido del backend:", data);
+    const checklistJSON = await response.json();
+
+    // 1) convertir a content (groupName -> array fields)
+    const content = generatePDFFromJSON(checklistJSON);
+
+    // debug rápido (verifica forma antes de generar)
+    console.log("content keys:", Object.keys(content));
+    for (const [g, f] of Object.entries(content)) {
+      console.log(g, Array.isArray(f), f.length, f[0]);
+    }
+
+    // 2) generar PDF
+    const pdfBytes = await generatePDF({
+      title: checklistJSON.titulo || `Checklist ${id}`,
+      content,
+    });
+
+    // 3) descargar
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Checklist_${checklistJSON.placa || id}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
   } catch (err) {
-    console.error(err);
+    console.error("handleCheckJSON error:", err);
   }
 };
-
-
 
 
   return (

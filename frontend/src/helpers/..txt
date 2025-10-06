@@ -1,0 +1,2 @@
+-nesesario
+-Limitar caracteeres a 80-100

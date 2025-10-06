@@ -1,6 +1,6 @@
 const express = require("express");
-const router = express.Router(); // 🔥 Esto faltaba
-const pool = require("../db"); // tu conexión a DB
+const router = express.Router(); // 🔥 obligatorio
+const pool = require("../db");
 
 router.get("/generate-pdf/:id", async (req, res) => {
   try {
@@ -12,9 +12,7 @@ router.get("/generate-pdf/:id", async (req, res) => {
     if (!rows.length) return res.status(404).send("Checklist no encontrado");
 
     const contenido = JSON.parse(rows[0].contenido_json);
-    console.log("Contenido JSON recibido:", contenido); // Verificación en consola
 
-    // Por ahora solo devolvemos el JSON para verificar
     res.json(contenido);
 
   } catch (err) {
@@ -22,3 +20,5 @@ router.get("/generate-pdf/:id", async (req, res) => {
     res.status(500).send("Error al obtener checklist");
   }
 });
+
+module.exports = router; // 🔥 obligatorio
