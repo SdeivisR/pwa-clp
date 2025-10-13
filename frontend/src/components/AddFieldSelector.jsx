@@ -12,6 +12,7 @@ import SignatureCanvas from "react-signature-canvas";
 const FIELD_TYPES = [
   "Checkbox",
   "Comentario",
+  "FechasP",
   "Fechas",
   "Firma",
   "Firma + Texto",
@@ -20,7 +21,6 @@ const FIELD_TYPES = [
   "Kilometraje",
   "Lista",
   "Numérico",
-  "Recomendación Inteligente (IA)",
   "Selección Múltiple",
   "Texto",
   "Texto + Si/No",

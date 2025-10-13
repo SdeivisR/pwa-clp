@@ -1,39 +1,39 @@
-case "Checkbox":
-  return (
-    <CheckboxField
-      field={field}
-      handleChange={handleCheckboxChange}
-    />
-  );
+1️⃣ Clasificación de checklists
 
-// Componente separado
-function CheckboxField({ field, handleChange }) {
-  const value = field.value ?? ""; // 👈 usamos field.value igual que en los demás
+Implementación: reglas + modelo ligero (JS o TF.js)
 
-  return (
-    <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
-      <span className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</span>
-      <div className="flex items-center gap-4 sm:gap-6">
-        {/* Opción Sí */}
-        <label
-          className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
-            ${value === "si" ? "bg-green-100 border border-green-400" : "hover:bg-gray-100"}`}
-          onClick={() => handleChange(field.id, "si")}
-        >
-          <Checkbox checked={value === "si"} />
-          <span className="text-gray-700 font-medium">Sí</span>
-        </label>
+Visualización: tabla / colores
 
-        {/* Opción No */}
-        <label
-          className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
-            ${value === "no" ? "bg-red-100 border border-red-400" : "hover:bg-gray-100"}`}
-          onClick={() => handleChange(field.id, "no")}
-        >
-          <Checkbox checked={value === "no"} />
-          <span className="text-gray-700 font-medium">No</span>
-        </label>
-      </div>
-    </div>
-  );
-}
+Tiempo estimado: 1–2 días
+
+2️⃣ Score de salud del vehículo
+
+Implementación: cálculo de puntaje (regresión simple)
+
+Visualización: tarjetas con colores
+
+Tiempo estimado: 1 día
+
+3️⃣ Agrupación de errores (Clustering/NLP)
+
+Implementación: clustering de etiquetas / errores
+
+Visualización: tabla con alertas y conteos
+
+Tiempo estimado: 2 días
+
+4️⃣ Resumen de alertas (IA generativa ligera)
+
+Implementación: resumir errores críticos en 1–2 frases
+
+Visualización: tarjetas con mensaje de alerta
+
+Tiempo estimado: 1 día
+
+5️⃣ Predicción de errores por tipo de campo
+
+Implementación: análisis probabilístico simple
+
+Visualización: gráfico donut / barras
+
+Tiempo estimado: 1 día

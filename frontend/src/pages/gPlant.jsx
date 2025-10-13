@@ -12,13 +12,13 @@ import EditPlantillaModal from "../components/EditPlantillaModal";
 export default function GPlant() {
   const navigate = useNavigate();
   const [plantillas, setPlantillas] = useState([]);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [toDelete, setToDelete] = useState({ id: null, titulo: "" });
   const [deleting, setDeleting] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingPlantilla, setEditingPlantilla] = useState({ id: null, titulo: "", descripcion: "" });
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState({ id: null, titulo: "" });
 
 
   // 📂 Cargar plantillas desde JSON en public/data
@@ -48,44 +48,34 @@ export default function GPlant() {
     setError("Error al cargar plantilla seleccionada");
   }
 };
-
-
-  // 👉 Eliminar plantilla (desde la BD y actualizar estado)
+  ///Modal de eliminar
   const openDeleteModal = (id, titulo) => {
-    setToDelete({ id, titulo });
-    setDeleteModalVisible(true);
+    setItemToDelete({ id, titulo });
+    setIsModalOpen(true);
   };
-  // Cerrar modal
-  const closeDeleteModal = () => {
-    if (deleting) return; // no cerrar mientras se elimina
-    setDeleteModalVisible(false);
-    setToDelete({ id: null, titulo: "" });
-  };
-  const confirmDelete = async () => {
-    if (!toDelete.id) return;
+  const handleDelete = async () => {
+    if (!itemToDelete?.id) return;
     setDeleting(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/plantillas/${toDelete.id}`, {
+      const res = await fetch(`http://localhost:3000/api/plantillas/${itemToDelete.id}`, {
         method: "DELETE",
       });
 
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        throw new Error(errBody.error || "Error al eliminar plantilla");
-      }
+      if (!res.ok) throw new Error("Error al eliminar plantilla");
 
-      // Actualizar estado (quitar la plantilla eliminada)
-      setPlantillas((prev) => prev.filter((p) => p.id !== toDelete.id));
+      // Actualizar lista
+      setPlantillas((prev) => prev.filter((p) => p.id !== itemToDelete.id));
 
-      setDeleteModalVisible(false);
-      setToDelete({ id: null, titulo: "" });
     } catch (err) {
-      console.error("❌ Error eliminando plantilla:", err);
+      console.error(err);
       alert("Error eliminando plantilla: " + err.message);
     } finally {
       setDeleting(false);
+      setIsModalOpen(false);
+      setItemToDelete({ id: null, titulo: "" });
     }
   };
+
 
   // 👉 Editar plantilla
   const openEditModal = (plantilla) => {
@@ -195,6 +185,7 @@ export default function GPlant() {
                   <Edit size={16} /> Editar
                 </button>
                 <button
+                  key={p.id}
                   onClick={() => openDeleteModal(p.id, p.titulo)}
                   className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 hover:bg-red-100 rounded-full transition"
                 >
@@ -211,12 +202,11 @@ export default function GPlant() {
 
 
       <ConfirmDeleteModal
-        visible={deleteModalVisible}
-        onClose={closeDeleteModal}
-        itemName={toDelete.titulo}
-        loading={deleting}
-        onConfirm={confirmDelete}
-      />  
+        visible={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleDelete}
+        itemName={itemToDelete?.titulo} 
+      />
       <EditPlantillaModal
         visible={editModalVisible}
         onClose={closeEditModal}
@@ -224,7 +214,7 @@ export default function GPlant() {
         plantilla={editingPlantilla}
         setPlantilla={setEditingPlantilla}
         onSave={handleSaveQuickEdit} 
-      />
+      />   
 
     </div>
   );

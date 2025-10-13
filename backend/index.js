@@ -1,3 +1,4 @@
+//index..js
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -8,7 +9,9 @@ const rolesRoutes = require("./routes/roles");
 const checklistsRouter = require("./routes/checklists");
 const vehiculosRouter = require("./routes/vehiculos");
 const pdfRoutes = require("./routes/pdf"); 
-
+const recomendacionesRouter = require("./routes/recomendaciones");
+const dashboardsRouter = require("./routes/dashboards");
+const aiRoutes = require("./routes/aiRoutes.js") ;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -25,12 +28,9 @@ app.use("/api/roles", rolesRoutes);
 app.use("/api/checklists", checklistsRouter); 
 app.use("/api/vehiculos", vehiculosRouter); 
 app.use("/api/pdf", pdfRoutes);
-
-
-// Test
-app.get("/api/hola", (req, res) => {
-  res.json({ mensaje: "Hola desde el backend 🚀" });
-});
+app.use("/api/recomendaciones", recomendacionesRouter);
+app.use('/api/dashboards', dashboardsRouter);
+app.use("/api/ai", aiRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);

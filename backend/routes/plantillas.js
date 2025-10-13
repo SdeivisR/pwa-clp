@@ -67,10 +67,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-
-
 // 📌 Actualizar plantilla existente
-// PUT /api/plantillas/:id/full
 router.put("/:id/full", async (req, res) => {
   const { id } = req.params;
   const { titulo, descripcion, estructura_json } = req.body;
@@ -124,9 +121,6 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
-
-
-
 
 // 🗑️ Eliminar plantilla
 router.delete("/:id", async (req, res) => {

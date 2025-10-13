@@ -14,77 +14,117 @@ import { UserContext } from "../context/UserContext";
 
 //Funciones 
   // TextoSiNo.jsx
-      function TextoSiNo({ field, updateFieldValue }) {
-        const value = field.cB ?? ""; // Valor del Sí/No
-        const textValue = field.value ?? ""; // Valor del texto
+    function TextoSiNo({ field, updateFieldValue }) {
+      const [value, setValue] = useState(field.cB ?? ""); // Valor del Sí/No
+      const [textValue, setTextValue] = useState(field.value ?? ""); // Valor del texto
+      const [touched, setTouched] = useState(false); // Para validar si el usuario ya interactuó
 
-        return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
-            <span className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</span>
+      // Función para limitar a 100 palabras
+      const handleTextChange = (e) => {
+        const words = e.target.value.split(/\s+/);
+        const limitedWords = words.slice(0, 100).join(" ");
+        setTextValue(limitedWords);
+        updateFieldValue(field.id, { ...field, value: limitedWords });
+      };
 
-            <div className="flex items-center gap-4 sm:gap-6">
-              <label
-                className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
-                  ${value === "si" ? "bg-green-100 border border-green-400" : "hover:bg-gray-100"}`}
-                onClick={() => updateFieldValue(field.id, { ...field, cB: "si" })}
-              >
-                <Checkbox checked={value === "si"} readOnly />
-                <span className="text-gray-700 font-medium">Sí</span>
-              </label>
-
-              <label
-                className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
-                  ${value === "no" ? "bg-red-100 border border-red-400" : "hover:bg-gray-100"}`}
-                onClick={() => updateFieldValue(field.id, { ...field, cB: "no" })}
-              >
-                <Checkbox checked={value === "no"} readOnly />
-                <span className="text-gray-700 font-medium">No</span>
-              </label>
-            </div>
-
-            <Input
-              value={textValue}
-              onChange={(e) =>
-                updateFieldValue(field.id, { ...field, value: e.target.value })
-              }
-              placeholder="Escribe aquí..."
-              className="rounded-xl border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition mt-2 px-3 py-2"
-            />
-          </div>
-        );
-      }
-
-    // CheckboxField.jsx
-      function CheckboxField({ field, handleChange }) {
-        const value = field.cB ?? ""; 
+      const showError = touched && !textValue.trim(); // Error si está vacío y se tocó
 
       return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
-            <span className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</span>
-            <div className="flex items-center gap-4 sm:gap-6">
-              {/* Opción Sí */}
-              <label
-                className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
-                  ${value === "si" ? "bg-green-100 border border-green-400" : "hover:bg-gray-100"}`}
-                onClick={() => handleChange(field.id, "si")}
-              >
-                <Checkbox checked={value === "si"} />
-                <span className="text-gray-700 font-medium">Sí</span>
-              </label>
+        <div
+          className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+            showError ? "border-red-500" : "border-gray-200"
+          }`}
+        >
+          <span className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</span>
 
-              {/* Opción No */}
-              <label
-                className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base
-                  ${value === "no" ? "bg-red-100 border border-red-400" : "hover:bg-gray-100"}`}
-                onClick={() => handleChange(field.id, "no")}
-              >
-                <Checkbox checked={value === "no"} />
-                <span className="text-gray-700 font-medium">No</span>
-              </label>
-            </div>
+          <div className="flex items-center gap-4 sm:gap-6">
+            <label
+              className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base ${
+                value === "si" ? "bg-green-100 border border-green-400" : "hover:bg-gray-100"
+              }`}
+              onClick={() => {
+                setValue("si");
+                updateFieldValue(field.id, { ...field, cB: "si" });
+                setTouched(true);
+              }}
+            >
+              <Checkbox checked={value === "si"} readOnly />
+              <span className="text-gray-700 font-medium">Sí</span>
+            </label>
+
+            <label
+              className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base ${
+                value === "no" ? "bg-red-100 border border-red-400" : "hover:bg-gray-100"
+              }`}
+              onClick={() => {
+                setValue("no");
+                updateFieldValue(field.id, { ...field, cB: "no" });
+                setTouched(true);
+              }}
+            >
+              <Checkbox checked={value === "no"} readOnly />
+              <span className="text-gray-700 font-medium">No</span>
+            </label>
           </div>
-        );
-      }
+
+          <Input
+            value={textValue|| ""}
+            onChange={handleTextChange}
+            maxLength={100}
+            onBlur={() => setTouched(true)}
+            placeholder="Escribe aquí..."
+            className={`rounded-xl px-3 py-2 mt-2 border ${
+              showError ? "border-red-500" : "border-gray-300"
+            } focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500`}
+          />
+
+          {showError && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio</p>}
+            <p className="text-gray-400 text-sm text-right">
+              {field.value ? field.value.length : 0}/100 caracteres
+            </p>
+          </div>
+      );
+    } 
+
+    // CheckboxField.jsx
+    function CheckboxField({ field, handleChange, submitted, camposConError }) {
+      const value = field.cB ?? "";
+      const showError = submitted && camposConError.includes(field.id);
+
+      return (
+        <div
+          className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+            showError ? "border-red-500" : "border-gray-200"
+          }`}
+        >
+          <span className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</span>
+
+          <div className="flex items-center gap-4 sm:gap-6">
+            {/* Opción Sí */}
+            <label
+              className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base ${
+                value === "si" ? "bg-green-100 border border-green-400" : "hover:bg-gray-100"
+              }`}
+              onClick={() => handleChange(field.id, "si")}
+            >
+              <Checkbox checked={value === "si"} readOnly />
+              <span className="text-gray-700 font-medium">Sí</span>
+            </label>
+
+            {/* Opción No */}
+            <label
+              className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base ${
+                value === "no" ? "bg-red-100 border border-red-400" : "hover:bg-gray-100"
+              }`}
+              onClick={() => handleChange(field.id, "no")}
+            >
+              <Checkbox checked={value === "no"} readOnly />
+              <span className="text-gray-700 font-medium">No</span>
+            </label>
+          </div>
+        </div>
+      );
+    }
 
 
 
@@ -103,7 +143,8 @@ export default function NCheck() {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const location = useLocation();
   const checklistId = location.state?.checklistId;
-  const [checklist, setChecklist] = useState(null);
+  const [camposConError, setCamposConError] = useState([]);
+
 
 
 
@@ -114,14 +155,16 @@ export default function NCheck() {
       .catch((err) => console.error("❌ Error cargando plantillas:", err));
   }, []);
 
-    const handleSelectTemplate = (template) => {
-      setSelectedTemplate(template.fields || []); 
-      setTemplateName(template.name);
-    };
     const handleCreateTemplate = () => {
       setLoading(true);
       setTimeout(() => {
       navigate("/cPlant");
+      }, 300);
+    };
+    const History = () => {
+      setLoading(true);
+      setTimeout(() => {
+      navigate("/hCheck");
       }, 300);
     };
     const handleInputChange = (fieldId, value) => {
@@ -156,10 +199,6 @@ export default function NCheck() {
         };
       });
     };
-    const handleSubmit = (e) => {
-      e.preventDefault(); 
-      setSubmitted(true);
-    };
     // Función para guardar la firma en el campo correspondiente
     const updateFieldValue = (fieldId, value) => {
       setSelectedTemplate((prev) => {
@@ -190,124 +229,165 @@ export default function NCheck() {
         return { ...prev, estructura_json: newEstructura };
       });
     };
-    const isGroupedTemplate = (template) => {
-      return (
-        template &&
-        Array.isArray(template.fields) &&
-        template.fields.length > 0 &&
-        typeof template.fields[0] === "object" &&
-        template.fields[0] !== null &&
-        "fields" in template.fields[0]
-      );
-    }; 
     //Validacion del Require   
     const validarCampo = (field) => {
       if (!field.required) return true;
 
       switch (field.type) {
         case "Texto":
-        case "Comentarios":
-          return (
-            field.value !== null &&
-            field.value !== undefined &&
-            String(field.value).trim() !== ""
-          );
+        case "Comentario":
+          return field.value && String(field.value).trim() !== "";
+        case "Numérico":
+        case "Kilometraje":
+          return field.value !== null && field.value !== undefined && field.value !== "";
+
         case "Lista":
           return field.value && field.value !== "";
+
         case "Selección Múltiple":
           return Array.isArray(field.value) && field.value.length > 0;
         case "Imágenes tipo lista":
-          return !!field.value;
+          return field.value && field.value !== "";
+
+        case "Firma":
+          return field.value && field.value !== "";
+
+        case "Firma + Texto":
+          return field.value && field.value !== "" && field.com && field.com.trim() !== "";
+
+        case "Fechas":
+          return field.value && field.value !== "";
+
+        case "FechasP":
+          return field.startDate && field.endDate && field.startDate !== "" && field.endDate !== "";
+
+        case "Hora":
+          return field.value && field.value !== "";
+
+        case "Recomendación Inteligente (IA)":
+          return field.value && field.value !== "";
+
         default:
           return true;
       }
     };
+
+
     // Render para formulario
     const renderField = (field, updateField, updateFieldValue, handleInputChange) => {
         switch (field.type) {
 
       case "Texto":
-          return (
-            <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
-              <label className="text-lg font-semibold text-gray-800 block mt-1">
-                {field.label}
-              </label>
-                <Input
-                  type="text"
-                  value={field.value || ""}
-                  onChange={(e) => updateFieldValue(field.id, e.target.value)}
-                  placeholder="Escribe aquí..."
-                  className={`border p-2 rounded w-full ${
-                    submitted && !field.value ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {submitted && !field.value ? (
-                  <p className="text-red-500 text-sm">Este campo es obligatorio</p>
-                ) : null}
-            </div>
-          );
-      case "Comentario":
         return (
           <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+            <label className="text-lg font-semibold text-gray-800 block mt-1">
+              {field.label}
+            </label>
+            <Input
+              type="text"
+              value={field.value || ""}
+              maxLength={70} // límite de caracteres
+              onChange={(e) => updateFieldValue(field.id, e.target.value.slice(0, 70))} // asegurar límite
+              placeholder="Escribe aquí..."
+              className={`w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base pr-12 ${
+                submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {submitted && (!field.value || field.value.trim() === "") ? (
+              <p className="text-red-500 text-sm">Este campo es obligatorio</p>
+            ) : null}
+            <p className="text-gray-400 text-sm text-right">
+              {field.value ? field.value.length : 0}/70 caracteres
+            </p>
+          </div>
+        );
+      case "Comentario":
+        return (
+          <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+              submitted && camposConError.includes(field.id) ? "border-red-500" : "border-gray-300"
+            }`}
+          >
             <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
             <Textarea
-              placeholder="Escribe tu comentario..."
+              type="text"
               value={field.value || ""}
-              onChange={(e) => updateFieldValue(field.id, e.target.value)}
-              className="min-h-[100px] rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition resize-none px-3 py-2 text-sm sm:text-base"
+              maxLength={120}
+              onChange={(e) => updateFieldValue(field.id, e.target.value.slice(0, 120))}
+              placeholder="Escribe tu comentario..."
+              className={`min-h-[100px] rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition resize-none px-3 py-2 text-sm sm:text-base ${
+                submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
+              }`}
             />
+            
+            {submitted && (!field.value || field.value.trim() === "") ? (
+              <p className="text-red-500 text-sm">Este campo es obligatorio</p>
+            ) : null}
+            <p className="text-gray-400 text-sm text-right">
+              {field.value ? field.value.length : 0}/120 caracteres
+            </p>
           </div>
         );
       case "Fechas":
         return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
-            <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
-            <Input
-              type="date"
-                value={field.value || ""}
-                onChange={(e) => updateFieldValue(field.id, e.target.value)}
-              className="rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base"
+          <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+              submitted && camposConError.includes(field.id) ? "border-red-500" : "border-gray-300"
+            }`}
+          >
+          <label className="text-base sm:text-lg font-semibold text-gray-800">
+            {field.label}
+          </label>
+          <Input
+            type="date"
+            value={field.value || ""}
+            onChange={(e) => updateFieldValue(field.id, e.target.value)}
+            className={`w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base pr-12 ${
+                submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
+              }`}
             />
-          </div>
-        );
+            {submitted && (!field.value || field.value.trim() === "") ? (
+              <p className="text-red-500 text-sm">Este campo es obligatorio</p>
+            ) : null}
+        </div>
+      );
       case "FechasP":
         return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+              submitted && camposConError.includes(field.id) ? "border-red-500" : "border-gray-200"
+            }`}
+          >
             <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
 
             {/* Fecha de inicio */}
             <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">
-              Día de Ingreso
-            </label>
-            <input
-              type="date"
-              value={field.startDate || ""}
-              onChange={(e) => {
-                const newStart = e.target.value;
-                if (field.endDate && newStart > field.endDate) {
-                  updateFieldFull(field.id, {
-                    ...field,
-                    startDate: "",
-                    endDate: "",
-                    error: "⚠️ La fecha de inicio no puede ser mayor que la de salida",
-                  });
-                  setTimeout(() => {
-                    updateFieldFull(field.id, { ...field, error: "" });
-                  }, 4000);
-                } else {
-                  updateFieldFull(field.id, { startDate: newStart, error: "" });
-                }
-              }}
-              className="rounded-xl border border-gray-300 px-3 py-2 text-sm sm:text-base"
-            />
-          </div>
+              <label className="text-sm font-medium text-gray-700">Día de Ingreso</label>
+              <input
+                type="date"
+                value={field.startDate || ""}
+                onChange={(e) => {
+                  const newStart = e.target.value;
+                  if (field.endDate && newStart > field.endDate) {
+                    updateFieldFull(field.id, {
+                      ...field,
+                      startDate: "",
+                      endDate: "",
+                      error: "⚠️ La fecha de inicio no puede ser mayor que la de salida",
+                    });
+                    setTimeout(() => {
+                      updateFieldFull(field.id, { ...field, error: "" });
+                    }, 4000);
+                  } else {
+                    updateFieldFull(field.id, { ...field, startDate: newStart, error: "" });
+                  }
+                }}
+                className={`rounded-xl border px-3 py-2 text-sm sm:text-base ${
+                  submitted && (!field.startDate || field.startDate.trim() === "") ? "border-red-500" : "border-gray-300"
+                }`}
+              />
+            </div>
 
             {/* Fecha de salida */}
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">
-                Día de Ingreso
-              </label>
+              <label className="text-sm font-medium text-gray-700">Día de Salida</label>
               <input
                 type="date"
                 value={field.endDate || ""}
@@ -324,89 +404,127 @@ export default function NCheck() {
                       updateFieldFull(field.id, { ...field, error: "" });
                     }, 4000);
                   } else {
-                    updateFieldFull(field.id, { endDate: newEnd, error: "" });
+                    updateFieldFull(field.id, { ...field, endDate: newEnd, error: "" });
                   }
                 }}
-                className="rounded-xl border border-gray-300 px-3 py-2 text-sm sm:text-base"
+                className={`rounded-xl border px-3 py-2 text-sm sm:text-base ${
+                  submitted && (!field.endDate || field.endDate.trim() === "") ? "border-red-500" : "border-gray-300"
+                }`}
               />
-              </div>
-            {/* Tarjeta de error moderna */}
-            {field.error && (
-              <div className="mt-2 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm shadow-sm">
-                {field.error}
-              </div>
-            )}
+            </div>
+
+            {/* Mensaje de error */}
+              {(submitted && (!field.startDate || !field.endDate)) || field.error ? (
+                  <p className="text-red-500 text-sm">
+                    {field.error || "Este campo es obligatorio"}
+                  </p>
+              ) : null}
           </div>
         );
       case "Hora":
         return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+              submitted && camposConError.includes(field.id) ? "border-red-500" : "border-gray-300"
+            }`}
+          >
             <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
             <Input
               type="time"
               value={field.value || ""}
               onChange={(e) => updateFieldValue(field.id, e.target.value)}
-              className="rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base"
+              className={`w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base pr-12 ${
+                submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
+              }`}
             />
-          </div>
-        );
+            {submitted && (!field.value || field.value.trim() === "") ? (
+              <p className="text-red-500 text-sm">Este campo es obligatorio</p>
+            ) : null}
+        </div>
+      );
       case "Kilometraje":
         return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+              submitted && camposConError.includes(field.id) ? "border-red-500" : "border-gray-300"
+            }`}
+          >
             <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
-            
-            <div className="relative flex items-center">
               <Input
                 type="number"
                 value={field.value || ""}
                 onChange={(e) => updateFieldValue(field.id, e.target.value)}
                 placeholder="0"
-                className="w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base pr-12"
-              />
-              <span className="absolute right-3 text-gray-600 text-sm sm:text-base">km</span>
-            </div>
-          </div>
-        );
+                className={`w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base pr-12 ${
+                    submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+            {submitted && (!field.value || field.value.trim() === "") ? (
+              <p className="text-red-500 text-sm">Este campo es obligatorio</p>
+            ) : null}
+        </div>
+      );
       case "Numérico":
         return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+              submitted && camposConError.includes(field.id) ? "border-red-500" : "border-gray-300"
+            }`}
+          >
             <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
             <Input
               type="number"
               value={field.value || ""}
               onChange={(e) => updateFieldValue(field.id, e.target.value)}
               placeholder="0"
-              className="rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base"
+              className={`w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base pr-12 ${
+                submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
+              }`}
             />
-          </div>
-        );
+            {submitted && (!field.value || field.value.trim() === "") ? (
+              <p className="text-red-500 text-sm">Este campo es obligatorio</p>
+            ) : null}
+        </div>
+      );
       case "Lista":
         return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
-            <label className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</label>
-              <select
-                value={field.value || ""}
-                onChange={(e) => updateFieldValue(field.id, e.target.value)} // 👈 solo el valor
-                className="rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base text-gray-700"
-              >
-                <option value="">Seleccione una opción</option>
-                {field.items?.map((item, index) => (
-                  <option key={index} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
+          <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+              submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-200"
+            }`}
+          >
+            <label className="text-base sm:text-lg font-semibold text-gray-800">
+              {field.label}
+            </label>
+            <select
+              value={field.value || ""}
+              onChange={(e) => updateFieldValue(field.id, e.target.value)}
+              className={`rounded-xl border px-3 py-2 text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition ${
+                submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
+              }`}
+            >
+              <option value="">Seleccione una opción</option>
+              {field.items?.map((item, index) => (
+                <option key={index} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+            {submitted && (!field.value || field.value.trim() === "") && (
+              <p className="text-red-500 text-sm mt-1">Este campo es obligatorio</p>
+            )}
           </div>
         );
       case "Selección Múltiple":
+        const values = Array.isArray(field.value) ? field.value : [];
+        const hasError = submitted && values.length === 0;
+
         return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+              hasError ? "border-red-500" : "border-gray-200"
+            }`}
+          >
             <label className="text-base sm:text-lg font-semibold text-gray-800">
               {field.label}
             </label>
             <div className="pl-2 sm:pl-4 space-y-2">
               {field.items?.map((item, index) => {
-                const values = Array.isArray(field.value) ? field.value : []; 
                 const isChecked = values.includes(item.value);
 
                 return (
@@ -427,7 +545,6 @@ export default function NCheck() {
                         }
                         updateFieldValue(field.id, newValue);
                       }}
-
                       className="h-4 w-4"
                     />
                     <span>{item.label}</span>
@@ -435,6 +552,9 @@ export default function NCheck() {
                 );
               })}
             </div>
+            {hasError && (
+              <p className="text-red-500 text-sm mt-1">Este campo es obligatorio</p>
+            )}
           </div>
         );
       case "Firma":
@@ -484,19 +604,31 @@ export default function NCheck() {
         );
       case "Firma + Texto":
         return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+              submitted && camposConError.includes(field.id) ? "border-red-500" : "border-gray-300"
+            }`}
+          >
             <label className="text-base sm:text-lg font-semibold text-gray-800">
               {field.label}
             </label>
               <input
                 type="text"
-                placeholder="Escribir aquí..."
+                value={field.com || ""}
+                maxLength={70}
                 onChange={(e) =>
                   updateField(field.id, { ...field, com: e.target.value })
                 }
-                value={field.com || ""}
-                className="border rounded-xl px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-200"
-              />
+                placeholder="Escribir aquí..."
+                              className={`w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base pr-12 ${
+                submitted && (!field.com || field.com.trim() === "") ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {submitted && (!field.com || field.com.trim() === "") ? (
+              <p className="text-red-500 text-sm">Este campo es obligatorio</p>
+            ) : null}
+            <p className="text-gray-400 text-sm text-right">
+              {field.com ? field.com.length : 0}/70 caracteres
+            </p>
 
 
             {field.value ? (
@@ -539,7 +671,10 @@ export default function NCheck() {
         );
       case "Imágenes tipo lista":
         return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+              submitted && camposConError.includes(field.id) ? "border-red-500" : "border-gray-300"
+            }`}
+          >
             <label className="text-base sm:text-lg font-semibold text-gray-800">
               {field.label}
             </label>
@@ -567,8 +702,13 @@ export default function NCheck() {
                 <img
                   src={field.items.find((i) => i.value === field.value)?.imageUrl}
                   alt="Imagen seleccionada"
-                  className="w-48 sm:w-64 h-auto rounded-lg border shadow-sm"
-                />
+                  className={`w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base pr-12 ${
+                      submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {submitted && (!field.value || field.value.trim() === "") ? (
+                    <p className="text-red-500 text-sm">Este campo es obligatorio</p>
+                  ) : null}
               </div>
             )}
           </div>
@@ -602,46 +742,45 @@ export default function NCheck() {
         return <div className="text-red-500">Tipo no soportado: {field.type}</div>;
     }
     };
-
     //Guardado
     const handleSave = async () => {
         if (!selectedTemplate) {
           alert("No hay plantilla seleccionada");
           return;
         }
-
+        setSubmitted(true);
         // Extraer la placa y conductor del template, si existen
         const fields = selectedTemplate.estructura_json.flatMap(group => group.fields);
+        // Validación de campos obligatorios
+        const camposInvalidos = fields.filter(f => f.required && !validarCampo(f));
+        if (camposInvalidos.length > 0) {
+          setCamposConError(camposInvalidos.map(f => f.label));
+          return; // detener la función: no se crea vehículo ni checklist
+        }
+        setCamposConError([]); // limpiar errores si todo está bien
+
         const placaField = fields.find(f => f.label === "Placa")?.value ?? null;
         const conductorField = fields.find(f => f.label === "Conductor")?.value ?? null;
 
         try {
-          let vehiculo_id = 1; // fallback si no hay vehículo
+          let vehiculo_id = 1;
 
-          // Si tenemos placa o conductor, intentar crear vehículo nuevo o usar existente
           if (placaField || conductorField) {
-            // Primero podrías buscar en tu backend si ya existe un vehículo con esa placa
             const resBuscar = await fetch(`http://localhost:3000/api/vehiculos?placa=${placaField}`);
             const dataBuscar = await resBuscar.json();
 
             if (dataBuscar && dataBuscar.length > 0) {
-              // Vehículo existe
               vehiculo_id = dataBuscar[0].id;
             } else {
-              // Crear nuevo vehículo
               const resCrear = await fetch("http://localhost:3000/api/vehiculos", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  placa: placaField,
-                  conductor: conductorField
-                }),
+                body: JSON.stringify({ placa: placaField, conductor: conductorField }),
               });
               const dataCrear = await resCrear.json();
-              vehiculo_id = dataCrear.vehiculo_id; // ID del nuevo vehículo
+              vehiculo_id = dataCrear.vehiculo_id;
             }
           }
-
           // Crear checklist
           const checklistToSave = {
             vehiculo_id,
@@ -655,7 +794,6 @@ export default function NCheck() {
             fecha_creacion: new Date().toISOString(),
             fecha_salida: null,
           };
-
           // Guardar checklist en backend
           const resChecklist = await fetch("http://localhost:3000/api/checklists", {
             method: "POST",
@@ -666,44 +804,39 @@ export default function NCheck() {
           if (!resChecklist.ok) throw new Error("Error al guardar en la base de datos");
 
           const dataChecklist = await resChecklist.json();
-          console.log("Checklist guardado:", dataChecklist);
           setTimeout(() => {
             navigate("/hCheck");
             }, 300);
-          alert("Checklist guardado correctamente");
-
         } catch (err) {
           console.error(err);
-          alert("No se pudo guardar el checklist");
         }
     };
+    useEffect(() => {
+      if (checklistId) {
+        const fetchChecklist = async () => {
+          try {
+            const res = await fetch(`http://localhost:3000/api/checklists/${checklistId}`);
+            const data = await res.json();
 
-useEffect(() => {
-  if (checklistId) {
-    const fetchChecklist = async () => {
-      try {
-        const res = await fetch(`http://localhost:3000/api/checklists/${checklistId}`);
-        const data = await res.json();
+            // Parseamos el JSON que guardaste
+            const contenido = JSON.parse(data.contenido_json);
 
-        // Parseamos el JSON que guardaste
-        const contenido = JSON.parse(data.contenido_json);
+            // Guardamos en selectedTemplate (esto ya llena el form)
+            setSelectedTemplate({
+              id: data.plantilla_id,
+              titulo: contenido.titulo ?? data.titulo,  
+              estructura_json: contenido.estructura_json ?? [],
+              fields: contenido.fields ?? []
+            });
+          } catch (err) {
+            console.error("Error al cargar checklist:", err);
+          }
+        };
 
-        // Guardamos en selectedTemplate (esto ya llena el form)
-        setSelectedTemplate({
-          id: data.plantilla_id,
-          titulo: contenido.titulo ?? data.titulo,  
-          estructura_json: contenido.estructura_json ?? [],
-          fields: contenido.fields ?? []
-        });
-      } catch (err) {
-        console.error("Error al cargar checklist:", err);
+        fetchChecklist();
       }
-    };
-
-    fetchChecklist();
-  }
-}, [checklistId]);
-
+    }, [checklistId]);
+    
   return (
 
     <div className="p-8 min-h-screen bg-gray-50">
@@ -742,10 +875,10 @@ useEffect(() => {
         {/* Generar PDF */}
         <button
           className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
-          onClick={() => alert("Generar PDF")}
+          onClick={History}
         >
           <FileText className="w-10 h-10 text-purple-600 mb-3" />
-          <span className="font-medium">Generar PDF</span>
+          <span className="font-medium">Historial</span>
         </button>
       </div>
         {/* Contenedor del formulario dinámico */}
