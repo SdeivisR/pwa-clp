@@ -1,9 +1,12 @@
 // src/pages/Settings.jsx
 import React, { useState, useEffect } from "react";
 import { User, Lock, Moon, Sun, Trash2, BookOpen, Pencil, Check } from "lucide-react";
+import Banner from "../components/Banner";
 
 export default function Settings() {
   const [darkMode, setDarkMode] = useState(false);
+  const [banner, setBanner] = useState(null);
+  const [bannerType, setBannerType] = useState("success");
   const [user, setUser] = useState({ nombre: "", email: "", cargo: "", id: null });
   const [editandoNombre, setEditandoNombre] = useState(false);
   const [passwords, setPasswords] = useState({
@@ -20,16 +23,10 @@ export default function Settings() {
     }
   }, []);
 
-  // 🌗 Cambiar modo oscuro
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark");
-  };
-
   // ✏️ Guardar nombre actualizado
   const guardarNombre = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/usuarios/${user.id}`, {
+      const res = await fetch(`http://localhost:3000/api/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre: user.nombre }),
@@ -44,45 +41,44 @@ export default function Settings() {
       alert("Error al actualizar el nombre");
     }
   };
-
+  
   // 🔑 Cambiar contraseña
-  const cambiarPassword = async () => {
-    if (passwords.nueva !== passwords.confirmar) {
-      return alert("Las contraseñas nuevas no coinciden");
-    }
-    try {
-      const res = await fetch(
-        `http://localhost:3000/api/usuarios/${user.id}/password`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            actualPassword: passwords.actual,
-            nuevaPassword: passwords.nueva,
-          }),
-        }
-      );
-      const data = await res.json();
-      alert(data.mensaje || data.error);
-    } catch (err) {
-      console.error("Error cambiando contraseña:", err);
-      alert("Error al cambiar la contraseña");
-    }
-  };
+const cambiarPassword = async () => {
+  if (passwords.nueva !== passwords.confirmar) {
+    showBanner("Las Nuevas Contraseña no coinciden", "error");
+    return;
+  }
 
-  // 🚫 Eliminar cuenta
-  const eliminarCuenta = async () => {
-    if (!confirm("¿Seguro que quieres eliminar tu cuenta?")) return;
-    try {
-      await fetch(`http://localhost:3000/api/usuarios/${user.id}`, {
-        method: "DELETE",
-      });
-      localStorage.removeItem("user");
-      alert("Cuenta eliminada correctamente");
-      window.location.href = "/login";
-    } catch (err) {
-      console.error("Error eliminando cuenta:", err);
+  try {
+    const res = await fetch(`http://localhost:3000/api/users/${user.id}/password`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        actualPassword: passwords.actual,
+        nuevaPassword: passwords.nueva,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showBanner("Error al Cambiar Contraseña", "error");
+      return;
     }
+
+    // ✅ Éxito
+    showBanner("Contraseña Cambiada Correctamente", "success");
+    setPasswords({ actual: "", nueva: "", confirmar: "" });
+  } catch (error) {
+    showBanner("Problemas en el Servidor", "error");
+  }
+};
+
+
+  const showBanner = (message, type = "info") => {
+    setBanner(message);
+    setBannerType(type);
+    setTimeout(() => setBanner(null), 1500);
   };
 
   return (
@@ -135,7 +131,7 @@ export default function Settings() {
 
           {/* Cargo (solo lectura como texto) */}
           <div className="p-2 border rounded-md bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-            {user.cargo || "Usuario del sistema"}
+            {user.rol_nombre || "Usuario del sistema"}
           </div>
         </div>
       </section>
@@ -149,72 +145,35 @@ export default function Settings() {
           </h3>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
-          <input
-            type="password"
-            placeholder="Contraseña actual"
-            value={passwords.actual}
-            onChange={(e) => setPasswords({ ...passwords, actual: e.target.value })}
-            className="p-2 border rounded-md dark:bg-gray-700 dark:text-white"
-          />
-          <input
-            type="password"
-            placeholder="Nueva contraseña"
-            value={passwords.nueva}
-            onChange={(e) => setPasswords({ ...passwords, nueva: e.target.value })}
-            className="p-2 border rounded-md dark:bg-gray-700 dark:text-white"
-          />
-          <input
-            type="password"
-            placeholder="Confirmar nueva contraseña"
-            value={passwords.confirmar}
-            onChange={(e) => setPasswords({ ...passwords, confirmar: e.target.value })}
-            className="p-2 border rounded-md dark:bg-gray-700 dark:text-white"
-          />
-        </div>
+          <div className="grid md:grid-cols-3 gap-4">
+            <input
+              type="password"
+              placeholder="Contraseña actual"
+              value={passwords.actual}
+              onChange={(e) => setPasswords({ ...passwords, actual: e.target.value })}
+              className="p-2 border rounded-md dark:bg-gray-700 dark:text-white"
+            />
+            <input
+              type="password"
+              placeholder="Nueva contraseña"
+              value={passwords.nueva}
+              onChange={(e) => setPasswords({ ...passwords, nueva: e.target.value })}
+              className="p-2 border rounded-md dark:bg-gray-700 dark:text-white"
+            />
+            <input
+              type="password"
+              placeholder="Confirmar nueva contraseña"
+              value={passwords.confirmar}
+              onChange={(e) => setPasswords({ ...passwords, confirmar: e.target.value })}
+              className="p-2 border rounded-md dark:bg-gray-700 dark:text-white"
+            />
+          </div>
 
         <button
           onClick={cambiarPassword}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
         >
           Actualizar contraseña
-        </button>
-      </section>
-
-      {/* Tema del sistema */}
-      <section className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {darkMode ? <Moon className="text-blue-600" /> : <Sun className="text-yellow-500" />}
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-              Tema del sistema
-            </h3>
-          </div>
-          <button
-            onClick={toggleDarkMode}
-            className="flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:opacity-80 transition"
-          >
-            {darkMode ? "Modo oscuro 🌙" : "Modo claro ☀️"}
-          </button>
-        </div>
-      </section>
-
-      {/* Eliminar cuenta */}
-      <section className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-3 mb-3">
-          <Trash2 className="text-red-600" />
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-            Eliminar cuenta
-          </h3>
-        </div>
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-          Esta acción no se puede deshacer. Se eliminarán todos tus datos del sistema.
-        </p>
-        <button
-          onClick={eliminarCuenta}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-        >
-          Eliminar mi cuenta
         </button>
       </section>
 
@@ -233,6 +192,13 @@ export default function Settings() {
           Ver guía
         </button>
       </section>
+      {banner && (
+        <Banner
+          message={banner}
+          type={bannerType}
+          onClose={() => setBanner(null)}
+        />
+      )}
     </div>
   );
 }

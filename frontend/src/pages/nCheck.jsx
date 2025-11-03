@@ -10,6 +10,7 @@ import { Textarea } from "../components/ui/textarea";
 import SignaturePad from "@/components/SignaturePad"; 
 import Spinner from "../components/Spinner";
 import { UserContext } from "../context/UserContext";
+import Banner from "../components/Banner";
 
 
 //Funciones 
@@ -28,6 +29,8 @@ import { UserContext } from "../context/UserContext";
       };
 
       const showError = touched && !textValue.trim(); // Error si está vacío y se tocó
+
+
 
       return (
         <div
@@ -141,6 +144,8 @@ export default function NCheck() {
   const location = useLocation();
   const checklistId = location.state?.checklistId;
   const [camposConError, setCamposConError] = useState([]);
+  const [banner, setBanner] = useState(null);
+  const [bannerType, setBannerType] = useState("success");
 
   useEffect(() => {
     fetch("http://localhost:3000/api/plantillas")
@@ -219,49 +224,7 @@ export default function NCheck() {
       return { ...prev, estructura_json: newEstructura };
     });
   };
-  //Validacion del Require   
-  const validarCampo = (field) => {
-      if (!field.required) return true;
-
-      switch (field.type) {
-        case "Texto":
-        case "Comentario":
-          return field.value && String(field.value).trim() !== "";
-        case "Numérico":
-        case "Kilometraje":
-          return field.value !== null && field.value !== undefined && field.value !== "";
-
-        case "Lista":
-          return field.value && field.value !== "";
-
-        case "Selección Múltiple":
-          return Array.isArray(field.value) && field.value.length > 0;
-        case "Imágenes tipo lista":
-          return field.value && field.value !== "";
-
-        case "Firma":
-          return field.value && field.value !== "";
-
-        case "Firma + Texto":
-          return field.value && field.value !== "" && field.com && field.com.trim() !== "";
-
-        case "Fechas":
-          return field.value && field.value !== "";
-
-        case "FechasP":
-          return field.startDate && field.endDate && field.startDate !== "" && field.endDate !== "";
-
-        case "Hora":
-          return field.value && field.value !== "";
-
-        case "Recomendación Inteligente (IA)":
-          return field.value && field.value !== "";
-
-        default:
-          return true;
-      }
-  };
-  // Render para formulario
+    // Render para formulario
   const renderField = (field, updateField, updateFieldValue, handleInputChange) => {
         switch (field.type) {
 
@@ -730,75 +693,136 @@ export default function NCheck() {
         return <div className="text-red-500">Tipo no soportado: {field.type}</div>;
     }
   };
+  //Validacion del Require  
+  const validarCampo = (field) => {
+      if (!field.required) return true;
+
+      switch (field.type) {
+        case "Texto":
+        case "Comentario":
+          return field.value && String(field.value).trim() !== "";
+        case "Numérico":
+        case "Kilometraje":
+          return field.value !== null && field.value !== undefined && field.value !== "";
+
+        case "Lista":
+          return field.value && field.value !== "";
+
+        case "Selección Múltiple":
+          return Array.isArray(field.value) && field.value.length > 0;
+        case "Imágenes tipo lista":
+          return field.value && field.value !== "";
+
+        case "Firma":
+          return field.value && field.value !== "";
+
+        case "Firma + Texto":
+          return field.value && field.value !== "" && field.com && field.com.trim() !== "";
+
+        case "Fechas":
+          return field.value && field.value !== "";
+
+        case "FechasP":
+          return field.startDate && field.endDate && field.startDate !== "" && field.endDate !== "";
+
+        case "Hora":
+          return field.value && field.value !== "";
+
+        case "Recomendación Inteligente (IA)":
+          return field.value && field.value !== "";
+
+        default:
+          return true;
+      }
+  };
   //Guardado
   const handleSave = async () => {
-        if (!selectedTemplate) {
-          alert("No hay plantilla seleccionada");
-          return;
-        }
-        setSubmitted(true);
-        // Extraer la placa y conductor del template, si existen
-        const fields = selectedTemplate.estructura_json.flatMap(group => group.fields);
-        // Validación de campos obligatorios
-        const camposInvalidos = fields.filter(f => f.required && !validarCampo(f));
-        if (camposInvalidos.length > 0) {
-          setCamposConError(camposInvalidos.map(f => f.label));
-          return; // detener la función: no se crea vehículo ni checklist
-        }
-        setCamposConError([]); // limpiar errores si todo está bien
-
-        const placaField = fields.find(f => f.label === "Placa")?.value ?? null;
-        const conductorField = fields.find(f => f.label === "Conductor")?.value ?? null;
-
-        try {
-          let vehiculo_id = 1;
-
-          if (placaField || conductorField) {
-            const resBuscar = await fetch(`http://localhost:3000/api/vehiculos?placa=${placaField}`);
-            const dataBuscar = await resBuscar.json();
-
-            if (dataBuscar && dataBuscar.length > 0) {
-              vehiculo_id = dataBuscar[0].id;
-            } else {
-              const resCrear = await fetch("http://localhost:3000/api/vehiculos", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ placa: placaField, conductor: conductorField }),
-              });
-              const dataCrear = await resCrear.json();
-              vehiculo_id = dataCrear.vehiculo_id;
-            }
+          if (
+            !selectedTemplate ||
+            !selectedTemplate.id || // no tiene id
+            selectedTemplate.estructura_json.length === 0 // no tiene estructura
+          ) {
+            showBanner("Plantilla no Seleccionada", "error");
+            return;
           }
-          // Crear checklist
-          const checklistToSave = {
-            vehiculo_id,
-            plantilla_id: selectedTemplate.id,
-            contenido_json: JSON.stringify({
-              ...selectedTemplate,
-              placa: placaField,
-              conductor: conductorField,
-              creado_por: user?.name ?? null,
-            }),
-            fecha_creacion: new Date().toISOString(),
-            fecha_salida: null,
-          };
-          // Guardar checklist en backend
-          const resChecklist = await fetch("http://localhost:3000/api/checklists", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(checklistToSave),
-          });
+          setSubmitted(true);
+          // Extraer la placa y conductor del template, si existen
+          const fields = selectedTemplate.estructura_json.flatMap(group => group.fields);
+          
 
-          if (!resChecklist.ok) throw new Error("Error al guardar en la base de datos");
+          // Validación de campos obligatorios
+            let errores = 0;
+            const camposInvalidos = [];
+            
+            fields.forEach(f => {
+              const puntos = validarCampo(f);
+              if (puntos > 0) {
+                errores += puntos;
+                camposInvalidos.push(f.label);
+              }
+            });
+            
 
-          const dataChecklist = await resChecklist.json();
-          setTimeout(() => {
-            navigate("/hCheck");
-            }, 300);
-        } catch (err) {
-          console.error(err);
-        }
-  };
+            if (errores > 0) {
+              setCamposConError(camposInvalidos);
+              showBanner(`Complete los campos obligatorios`, "error");
+              return; // 🔴 detener guardado
+            }
+
+            setCamposConError([]); // limpiar errores si todo está correcto
+
+          const placaField = fields.find(f => f.label === "Placa")?.value ?? null;
+          const conductorField = fields.find(f => f.label === "Conductor")?.value ?? null;
+
+          try {
+            let vehiculo_id = 1;
+
+            if (placaField || conductorField) {
+              const resBuscar = await fetch(`http://localhost:3000/api/vehiculos?placa=${placaField}`);
+              const dataBuscar = await resBuscar.json();
+
+              if (dataBuscar && dataBuscar.length > 0) {
+                vehiculo_id = dataBuscar[0].id;
+              } else {
+                const resCrear = await fetch("http://localhost:3000/api/vehiculos", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ placa: placaField, conductor: conductorField }),
+                });
+                const dataCrear = await resCrear.json();
+                vehiculo_id = dataCrear.vehiculo_id;
+              }
+            }
+            // Crear checklist
+            const checklistToSave = {
+              vehiculo_id,
+              plantilla_id: selectedTemplate.id,
+              contenido_json: JSON.stringify({
+                ...selectedTemplate,
+                placa: placaField,
+                conductor: conductorField,
+                creado_por: user?.name ?? null,
+              }),
+              fecha_creacion: new Date().toISOString(),
+              fecha_salida: null,
+            };
+            // Guardar checklist en backend
+            const resChecklist = await fetch("http://localhost:3000/api/checklists", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(checklistToSave),
+            });
+
+            if (!resChecklist.ok) throw new Error("Error al guardar en la base de datos");
+
+            const dataChecklist = await resChecklist.json();
+            setTimeout(() => {
+              navigate("/hCheck");
+              }, 300);
+          } catch (err) {
+            console.error(err);
+          }
+    };
   useEffect(() => {
       if (checklistId) {
         const fetchChecklist = async () => {
@@ -824,6 +848,12 @@ export default function NCheck() {
         fetchChecklist();
       }
   }, [checklistId]);
+
+    const showBanner = (message, type = "info") => {
+        setBanner(message);
+        setBannerType(type);
+        setTimeout(() => setBanner(null), 1500);
+    };
     
   return (
     <div className="p-8 min-h-screen bg-gray-50">
@@ -953,6 +983,13 @@ export default function NCheck() {
 
         </CardContent>
       </Card>
+      )}
+      {banner && (
+        <Banner
+          message={banner}
+          type={bannerType}
+          onClose={() => setBanner(null)}
+        />
       )}
 
       <form

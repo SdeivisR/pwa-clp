@@ -370,7 +370,7 @@ export default function ChecklistTemplateBuilder() {
           }}
         >
           <FilePlus className="w-5 h-5" />
-          <span className="font-medium">Crear Nueva Plantilla</span>  
+          <span className="font-medium">Limpiar/Crear Nueva Plantilla</span>  
         </button>
         <button
           className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
