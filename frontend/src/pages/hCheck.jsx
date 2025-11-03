@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Edit, Trash2, Eye } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { generatePDFFromJSON } from "../helpers/generatePDFFromJSON";
 import { generatePDF } from "../utils/pdfGenerator"; 
@@ -41,21 +40,10 @@ export default function HCheck() {
       })
       .catch(err => console.error("Error cargando checklists:", err));
   }, []);
-  const handleDelete = async (id) => {
-    if (!window.confirm("¿Seguro que quieres eliminar este checklist?")) return;
-    try {
-      await fetch(`http://localhost:3000/api/checklists/${id}`, { method: "DELETE" });
-      setChecklists(checklists.filter(c => c.id !== id));
-    } catch (err) {
-      console.error("Error eliminando checklist:", err);
-    }
-  };
+
   const handleEditChecklist = (chk) => {
-    console.log("ID que voy a enviar:", chk.id);
     navigate("/ncheck", { state: { checklistId: chk.id } });
     };
-
-  // en hCheck.jsx o donde lo llamas
   const handleCheckJSON = async (id,estado_id) => {
     try {
       const response = await fetch(`http://localhost:3000/api/pdf/generate-pdf/${id}`);
@@ -102,7 +90,6 @@ export default function HCheck() {
     setToDelete({ id: chk.id }); // Solo guardamos el id
     setDeleteModalVisible(true);
   };
-
   // Cerrar modal
   const closeDeleteModal = () => {
     if (deleting) return; // no cerrar mientras se elimina
@@ -135,27 +122,6 @@ export default function HCheck() {
       setDeleting(false);
     }
   };
-  const updateEstado = async (id, nuevoEstado) => {
-  try {
-    const res = await fetch(`http://localhost:3000/api/checklists/${id}/estado`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ estado: nuevoEstado }),
-    });
-
-    if (!res.ok) throw new Error("Error al actualizar estado");
-
-    // ✅ Actualizar el estado en el front sin recargar
-    setChecklists((prev) =>
-      prev.map((chk) =>
-        chk.id === id ? { ...chk, estado_nombre: nuevoEstado } : chk
-      )
-    );
-  } catch (err) {
-    console.error("❌ Error:", err);
-    alert("No se pudo actualizar el estado");
-  }
-};
   const openChangeStateModal = (chk) => {
     setChecklistToChange(chk);
     setChangeStateModalVisible(true);
@@ -184,20 +150,19 @@ export default function HCheck() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <h1 className="text-2xl font-bold ml-4">Historial de Checklists</h1>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto rounded-lg shadow">
-          <table className="w-full border-collapse bg-white min-w-full">
+      <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+        <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">
+          Lista de Checklists
+        </h2>
+        <div className="bg-white rounded-2xl shadow overflow-x-auto mb-8">
+          <table className="min-w-full border border-gray-200">
             <thead className="bg-gray-100 text-gray-700 uppercase text-sm">
               <tr>
-                <th className="p-3 text-center">N° Plantilla</th>
-                <th className="p-3 text-center">Placa</th>
-                <th className="p-3 text-center">Estado</th>
-                <th className="p-3 text-center">Fecha</th>
-                <th className="p-3 text-center">Acciones</th>
+                <th className="p-3 border-b">N° Plantilla</th>
+                <th className="p-3 border-b">Placa</th>
+                <th className="p-3 border-b">Estado</th>
+                <th className="p-3 border-b">Fecha</th>
+                <th className="p-3 border-b">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -239,9 +204,10 @@ export default function HCheck() {
                         >
                           <Eye size={16} /> Imprimir
                         </button>
-                        <button className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 hover:bg-green-100 rounded-full transition"
-                            onClick={() => handleEditChecklist(chk)}>
-                            <Edit size={16} /> Editar
+                        <button 
+                          className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 hover:bg-green-100 rounded-full transition"
+                          onClick={() => handleEditChecklist(chk)}>
+                          <Edit size={16} /> Editar
                         </button>
                       <button
                         onClick={() => openDeleteModal(chk)}
@@ -276,9 +242,7 @@ export default function HCheck() {
           onConfirm={handleChangeState}
           checklist={checklistToChange}
           />
-
-      </CardContent>
-    </Card>
+      </div>
   );
   
 }

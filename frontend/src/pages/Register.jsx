@@ -76,22 +76,31 @@ export default function Register() {
 
 const handleLogin = async (e) => {
   e.preventDefault();
+  setMessage("");
+
   try {
     const res = await fetch("http://localhost:3000/api/users/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: formData.email, password: formData.password }),
+      body: JSON.stringify({ 
+        email: formData.email, 
+        password: formData.password }),
     });
+    
     const data = await res.json();
-
-    console.log("📦 Respuesta cruda del backend:", data); // 👈 MUY IMPORTANTE
+    console.log("📦 Respuesta cruda del backend:", data); 
 
     if (!res.ok) throw new Error(data.message || "Error de login");
+    
     localStorage.setItem("usuario", JSON.stringify(data.user));
     console.log("📦 Usuario guardado en localStorage:", data.user);
+    
     setUser(data.user);
+
     navigate("/home");
+
   } catch (err) {
+    console.error("❌ Error en login:", err);
     setMessage(err.message || "Error al iniciar sesión");
   }
 };
@@ -137,17 +146,14 @@ return (
           >
             Siguiente
           </button>
-
-          <p className="text-sm text-gray-500 mt-4">
+          <p className="text-sm text-gray-500">
             ¿No tienes una cuenta?{' '}
-            <a
-              href="https://accounts.google.com/signup"
-              target="_blank"
-              rel="noopener noreferrer"
+            <span
               className="text-blue-600 cursor-pointer hover:underline"
+              onClick={() => setStep(2)}
             >
               Crear cuenta
-            </a>
+            </span>
           </p>
         </form>
       )}
@@ -198,6 +204,7 @@ return (
             className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition font-semibold"
           >
             Registrarse
+            
           </button>
 
           <p className="text-sm text-gray-500">

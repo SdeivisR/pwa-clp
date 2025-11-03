@@ -3,9 +3,9 @@ import React from "react";
 
 export default function Banner({ message, type = "info", onClose }) {
   const colors = {
-    success: "from-green-400 to-green-600 text-white",
-    error: "from-red-400 to-red-600 text-white",
-    info: "from-blue-400 to-blue-600 text-white",
+    success: "from-green-500 to-green-600 text-white",
+    error: "from-red-500 to-red-600 text-white",
+    info: "from-blue-500 to-blue-600 text-white",
   };
 
   return (

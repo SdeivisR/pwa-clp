@@ -1,18 +1,17 @@
+//routes/plantillas.js
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
-
 const generarCodigo = (titulo) => {
   if (!titulo) return null;
   return titulo
     .split(" ")
-    .map(word => word[0])   // primera letra de cada palabra
+    .map(word => word[0])
     .join("")
     .toUpperCase()
-    .slice(0, 4);           // máximo 4 caracteres
+    .slice(0, 4);
 };
-
-
+// GET
 router.post("/", async (req, res) => {
   try {
     const { titulo, descripcion, estructura_json, creado_por } = req.body;
@@ -20,22 +19,18 @@ router.post("/", async (req, res) => {
     if (!titulo || !estructura_json) {
       return res.status(400).json({ error: "Título y estructura_json son obligatorios" });
     }
-
-    // 🔹 Generar código a partir del título
     const codigo = titulo
       .split(" ")
-      .map(word => word[0])   // primera letra de cada palabra
+      .map(word => word[0])
       .join("")
       .toUpperCase()
-      .slice(0, 4);           // máximo 4 caracteres
-
+      .slice(0, 4);
     const fecha = new Date().toISOString();
 
     const [result] = await pool.query(
       "INSERT INTO plantillas (titulo, codigo, descripcion, estructura_json, creado_por, fecha_creacion, fecha_modificacion) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [titulo, codigo, descripcion, JSON.stringify(estructura_json), creado_por, fecha, fecha]
     );
-
     res.status(201).json({ 
       message: "Plantilla creada con éxito", 
       id: result.insertId,
@@ -48,8 +43,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
-
-// 📌 Obtener todas las plantillas
+// GET/Obtener todas las plantillas
 router.get("/", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT * FROM plantillas ORDER BY fecha_modificacion DESC");
@@ -66,25 +60,20 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
-
 // 📌 Actualizar plantilla existente
 router.put("/:id/full", async (req, res) => {
   const { id } = req.params;
   const { titulo, descripcion, estructura_json } = req.body;
-
   try {
     const fecha = new Date().toISOString();
     const codigo = generarCodigo(titulo);
-
     const [result] = await pool.query(
       "UPDATE plantillas SET titulo = ?, codigo = ?, descripcion = ?, estructura_json = ?, fecha_modificacion = ? WHERE id = ?",
       [titulo, codigo, descripcion, JSON.stringify(estructura_json || {}), fecha, id]
     );
-
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Plantilla no encontrada" });
     }
-
     res.json({ mensaje: "Plantilla actualizada correctamente", codigo });
   } catch (err) {
     console.error("❌ Error en PUT /plantillas/:id/full:", err);
@@ -99,22 +88,18 @@ router.put("/:id", async (req, res) => {
   if (!estructura_json) {
     return res.status(400).json({ error: "estructura_json es obligatorio" });
   }
-
   try {
     const fecha = new Date().toISOString();
     const codigo = generarCodigo(titulo);
-
     const [result] = await pool.query(
       `UPDATE plantillas
        SET titulo = ?, codigo = ?, descripcion = ?, estructura_json = ?, fecha_modificacion = ?
        WHERE id = ?`,
       [titulo, codigo, descripcion, JSON.stringify(estructura_json), fecha, id]
     );
-
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Plantilla no encontrada" });
     }
-
     res.json({ mensaje: "Plantilla actualizada correctamente", id, codigo });
   } catch (err) {
     console.error("❌ Error al actualizar plantilla:", err);
@@ -122,21 +107,15 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// 🗑️ Eliminar plantilla
+//DELETE/Eliminar plantilla
 router.delete("/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
-    console.log("Intentando eliminar plantilla con id:", id);
-
     if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
-
     const [result] = await pool.query("DELETE FROM plantillas WHERE id = ?", [id]);
-    console.log("Resultado del DELETE:", result);
-
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Plantilla no encontrada" });
     }
-
     res.json({ message: "Plantilla eliminada con éxito" });
   } catch (error) {
     console.error("Error al eliminar plantilla:", error);

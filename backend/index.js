@@ -9,7 +9,6 @@ const rolesRoutes = require("./routes/roles");
 const checklistsRouter = require("./routes/checklists");
 const vehiculosRouter = require("./routes/vehiculos");
 const pdfRoutes = require("./routes/pdf"); 
-const recomendacionesRouter = require("./routes/recomendaciones");
 const dashboardsRouter = require("./routes/dashboards");
 const aiRoutes = require("./routes/aiRoutes.js") ;
 const app = express();
@@ -28,7 +27,6 @@ app.use("/api/roles", rolesRoutes);
 app.use("/api/checklists", checklistsRouter); 
 app.use("/api/vehiculos", vehiculosRouter); 
 app.use("/api/pdf", pdfRoutes);
-app.use("/api/recomendaciones", recomendacionesRouter);
 app.use('/api/dashboards', dashboardsRouter);
 app.use("/api/ai", aiRoutes);
 

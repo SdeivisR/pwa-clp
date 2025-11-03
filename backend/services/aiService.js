@@ -19,7 +19,6 @@ function entrenarModeloChecklists(jsonData) {
 
       if (!contenido || !contenido.estructura_json) return;
 
-      // ✅ Aplanar los campos correctamente
       const fields = [];
       contenido.estructura_json.forEach((grupo) => {
         if (grupo.fields && Array.isArray(grupo.fields)) {
@@ -37,7 +36,6 @@ function entrenarModeloChecklists(jsonData) {
 
       const score = total > 0 ? Math.round((positivos / total) * 100) : 0;
 
-      // Entradas (features): score y cantidad de "no"
       data.push([score, negativos]);
       labels.push(checklist.estado === "Completado" ? 1 : 0);
     } catch (err) {

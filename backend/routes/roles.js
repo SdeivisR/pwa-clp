@@ -1,7 +1,7 @@
-// routes/roles.js
+//routes/roles.js
 const express = require("express");
 const router = express.Router();
-const pool = require("../db"); // ajusta según cómo importas tu conexión a la BD
+const pool = require("../db");
 
 // GET todos los roles
 router.get("/", async (req, res) => {
@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Error obteniendo roles" });
   }
 });
-// 👉 Actualizar rol de usuario
+//PUT/Actualizar rol de usuario
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { rol_id } = req.body;

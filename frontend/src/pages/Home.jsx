@@ -143,24 +143,24 @@ export default function DashboardChecklists() {
         Dashboard de Checklists
       </h2>
       {/* Sección de métricas resumidas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-2xl p-4 shadow text-center">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <div className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200">
           <p className="text-gray-500 text-sm">Total Checklists</p>
           <h3 className="text-2xl font-bold text-blue-600">{checklists.length}</h3>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow text-center">
+        <div className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200">
           <p className="text-gray-500 text-sm">En Mantenimiento</p>
           <h3 className="text-2xl font-bold text-red-500">
             {mantenimientos}
           </h3>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow text-center">
+        <div className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200">
           <p className="text-gray-500 text-sm">Sin Problemas</p>
           <h3 className="text-2xl font-bold text-green-500">
             {sinProblemas}
           </h3>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow text-center">
+        <div className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200">
           <p className="text-gray-500 text-sm">Score Promedio</p>
           <h3 className="text-2xl font-bold text-yellow-500">
             {scoreSalud.length > 0
@@ -213,14 +213,14 @@ export default function DashboardChecklists() {
           </button>
       )}
       </div>
-          {/* Resultados de IA */}
-      <div className="bg-yellow-50 border rounded-xl p-4 shadow">
+      {/* Resultados de IA */}
+      <div className="bg-blue-50 border rounded-xl p-4 shadow">
         <h3 className="font-semibold mb-2 text-gray-800">Consultar Checklist</h3>
 
         <select
           value={selectedChecklist}
           onChange={(e) => setSelectedChecklist(e.target.value)}
-          className="border p-2 rounded w-full mb-3"
+          className="border p-2 rounded-xl w-full mb-3"
         >
           <option value="">-- Selecciona un checklist --</option>
           {checklists.map((c) => (
@@ -236,9 +236,36 @@ export default function DashboardChecklists() {
               ❌ {resultadoId.error}
             </p>
           ) : (
-            <pre className="text-sm text-gray-700 mt-2 bg-white p-2 rounded shadow-inner overflow-x-auto">
-              {JSON.stringify(resultadoId, null, 2)}
-            </pre>
+            <div className="mt-3 bg-white rounded-xl shadow-inner overflow-x-auto">
+              <table className="min-w-full text-sm text-gray-700">
+                <tbody>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-semibold text-gray-600">ID del Checklist</td>
+                    <td className="px-4 py-2">{resultadoId.checklistId}</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-semibold text-gray-600">Score</td>
+                    <td className="px-4 py-2">{resultadoId.score}%</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-4 py-2 font-semibold text-gray-600">Errores detectados</td>
+                    <td className="px-4 py-2">{resultadoId.negativos}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-semibold text-gray-600">Estado predicho</td>
+                    <td
+                      className={`px-4 py-2 font-semibold ${
+                        resultadoId.estadoPredicho === "Completado"
+                          ? "text-green-600"
+                          : "text-yellow-600"
+                      }`}
+                    >
+                      {resultadoId.estadoPredicho}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           )
         ) : (
           <p className="text-gray-500 italic mt-2">

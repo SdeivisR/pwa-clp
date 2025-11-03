@@ -1,6 +1,6 @@
 # PWA Proyecto
 
-Ya no puedo ayuda 🥺😪😴😭
+Proyecto de Checklist Dinamico Para la Empresa Group Sitem
 
 ## Estructura
 

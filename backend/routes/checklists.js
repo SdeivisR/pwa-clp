@@ -1,3 +1,4 @@
+//routes/checklists.js
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
@@ -66,8 +67,6 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: "Error al guardar el checklist" });
   }
 });
-
-
 // GET /checklists -> listar todos
 router.get("/", async (req, res) => {
   try {
@@ -103,7 +102,6 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Error al obtener checklists" });
   }
 });
-
 // GET /checklists/:id -> obtener un checklist específico
 router.get("/:id", async (req, res) => {
   try {
@@ -128,34 +126,30 @@ router.get("/:id", async (req, res) => {
     `;
 
     const [rows] = await pool.query(query, [id]);
-
     if (rows.length === 0) {
       return res.status(404).json({ message: "Checklist no encontrado" });
     }
-
     // Armar el folio
     const chk = rows[0];
     const checklist = {
       ...chk,
       folio: `${chk.plantilla_codigo || "SIN"}-${String(chk.numero_plantilla).padStart(3, "0")}`
     };
-
     res.json(checklist);
   } catch (err) {
     console.error("Error al obtener checklist:", err);
     res.status(500).json({ message: "Error al obtener checklist" });
   }
 });
-// Ruta DELETE para eliminar una checklist por ID
+// DELETE
 router.delete("/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
-    console.log("Intentando eliminar Checklist con id:", id);
 
     if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
 
     const [result] = await pool.query("DELETE FROM checklists WHERE id = ?", [id]);
-    console.log("Resultado del DELETE:", result);
+
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Checklist no encontrada" });
@@ -167,8 +161,7 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
-
-// Actualizar estado de checklist
+// PUT
 router.put("/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -192,10 +185,5 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
-
-
-
-
-
 
 module.exports = router;

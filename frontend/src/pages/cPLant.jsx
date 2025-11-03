@@ -14,9 +14,6 @@ import Spinner from "../components/Spinner";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 
-
-
-
 // 📌 Campos predefinidos
 const PREDEFINED_FIELDS = [
   { type: "Texto", label: "Conductor" },
@@ -351,50 +348,54 @@ export default function ChecklistTemplateBuilder() {
         setGroups([]);
       });
   }, [id]);
+
   return (
-    
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Constructor de Checklist</h1>
+      <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">
+      Constructor de Checklist
+      </h2>
 
       {/* Botones */}
-      <div className="flex flex-wrap gap-3 items-center mb-4 p-3 bg-gray-50 rounded-lg shadow-sm">
-        <Button
-          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <button
+          className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
           onClick={() => {
-            setLoading(true); // 🔹 activar spinner
+            setLoading(true);
             setTimeout(() => {
               setPlantillaSeleccionada(null);
               setGroups([]);
               setLoading(false); 
-              navigate("/cPlant"); // limpiar URL
+              navigate("/cPlant");
             }, 100);
           }}
         >
           <FilePlus className="w-5 h-5" />
-          Crear Nueva Plantilla
-        </Button>
-        <Button
-          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+          <span className="font-medium">Crear Nueva Plantilla</span>  
+        </button>
+        <button
+          className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
           onClick={() => {
             addGroup();
             showBanner("Nuevo grupo creado", "success");
           }}
         >
           <Plus className="w-5 h-5" />
-          Nuevo Grupo
-        </Button>
-        <Button
-        className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+          <span className="font-medium">Nuevo Grupo</span>  
+          
+        </button>
+        <button
+        className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
         onClick={() => {
           addPredefinedGroup();
           showBanner("Grupo preestablecido agregado", "info");
         }}
         >
           <FileText className="w-5 h-5" />
-          Preestablecidos
-        </Button>
-        <Button
-          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+          <span className="font-medium">Preestablecidos</span>  
+          
+        </button>
+        <button
+          className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
           onClick={() => {
             if (id) {
               setPlantillaSeleccionada({
@@ -409,10 +410,11 @@ export default function ChecklistTemplateBuilder() {
           }}
         >
           <Save className="w-5 h-5" />
-          {id ? "Sobreescribir" : "Guardar"}
-        </Button>
-        <Button
-          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+          <span className="font-medium">{id ? "Sobreescribir" : "Guardar"}</span>  
+          
+        </button>
+        <button
+          className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
           onClick={() => {
             setMoveMode(!moveMode);
             showBanner(
@@ -422,23 +424,22 @@ export default function ChecklistTemplateBuilder() {
           }}
         >
           <Move className="w-5 h-5" />
-          {moveMode ? "Modo Edición" : "Modo Movimiento"}
-        </Button>
-        <Button
-          className="flex-1 min-w-[160px] h-11 flex items-center justify-center gap-2"
+          <span className="font-medium">{moveMode ? "Modo Edición" : "Modo Movimiento"}</span>  
+          
+        </button>
+        <button
+          className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
           onClick={() => {
-            setLoading(true); // 🔹 activar spinner
+            setLoading(true);
             setTimeout(() => {
               setLoading(false); 
               navigate("/gPlant");
-            }, 100); // 🔹 espera 0.5s
+            }, 100);
           }}
         >
           <Settings className="w-5 h-5" />
-          Gestionar Plantillas
-        </Button>
-
-
+          <span className="font-medium">Gestionar Plantillas</span>  
+        </button>
       </div>
       {/* Grupos */}
       <DragDropContext onDragEnd={handleDragEnd}>
@@ -523,6 +524,7 @@ export default function ChecklistTemplateBuilder() {
       </DragDropContext>
       {modalVisible && (
         <InputModal
+          visible={modalVisible}
           onClose={() => setModalVisible(false)} // para cerrar el modal desde adentro
           onSave={(titulo, descripcion) => {
             saveTemplate(titulo, descripcion); // llama a tu función
@@ -532,6 +534,7 @@ export default function ChecklistTemplateBuilder() {
       )}
       {overwriteModalVisible && (
         <OverwriteModal
+          visible={overwriteModalVisible}
           plantilla={plantillaSeleccionada}
           onClose={() => setOverwriteModalVisible(false)}
           onOverwrite={(datos) => {
@@ -548,7 +551,6 @@ export default function ChecklistTemplateBuilder() {
         />
       )}
       {loading && <Spinner />}
-        {banner && <Banner message={banner} type={bannerType} onClose={() => setBanner(null)} />}
       {/* Debug opcional */}
       {error && <div className="p-4 bg-red-100 text-red-700 rounded">{error}</div>}
 

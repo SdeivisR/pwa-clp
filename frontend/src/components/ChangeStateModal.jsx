@@ -3,14 +3,17 @@ import { Dialog, Transition } from "@headlessui/react";
 import { X } from "lucide-react";
 
 export default function ChangeStateModal({ visible, onClose, onConfirm, checklist }) {
-  // No renderizar si no está visible o no hay checklist válido
+
+
   if (!visible || !checklist) return null;
 
   return (
     <Transition appear show={visible} as={Fragment}>
-      <Dialog as="div" 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" 
-      onClose={onClose}>
+      <Dialog  
+        as="div" 
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" 
+        onClose={onClose}
+      >
         <div className="min-h-screen px-4 text-center">
           {/* Centrado vertical */}
           <span className="inline-block h-screen align-middle" aria-hidden="true">&#8203;</span>
@@ -39,9 +42,11 @@ export default function ChangeStateModal({ visible, onClose, onConfirm, checklis
 
               <div className="flex justify-between gap-4">
                 <button
-                  onClick={() => onConfirm(3)} // 3 = Anulado
+                  onClick={() => {
+                    onConfirm(3)
+                  }}
                   className="flex-1 bg-red-100 text-red-700 px-4 py-2 rounded hover:bg-red-200 transition"
-                >
+               >
                   Anulado
                 </button>
 

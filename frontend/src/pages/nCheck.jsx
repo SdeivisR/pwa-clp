@@ -1,7 +1,7 @@
 // src/pages/NCheck.jsx
 import { useEffect, useState, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { RefreshCw, Trash2, Loader2, Save, FileText, FilePlus, FolderPlus } from "lucide-react";
+import { RefreshCw, Trash2, Save, FileText, FilePlus, FolderPlus } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import TemplatesModal from "../components/TemplatesModal";
 import { Input } from "../components/ui/input";
@@ -85,7 +85,6 @@ import { UserContext } from "../context/UserContext";
           </div>
       );
     } 
-
     // CheckboxField.jsx
     function CheckboxField({ field, handleChange, submitted, camposConError }) {
       const value = field.cB ?? "";
@@ -126,8 +125,6 @@ import { UserContext } from "../context/UserContext";
       );
     }
 
-
-
 export default function NCheck() {
   const navigate = useNavigate();
   const [selectedTemplate, setSelectedTemplate] = useState({ fields: [], estructura_json: []  });
@@ -145,9 +142,6 @@ export default function NCheck() {
   const checklistId = location.state?.checklistId;
   const [camposConError, setCamposConError] = useState([]);
 
-
-
-
   useEffect(() => {
     fetch("http://localhost:3000/api/plantillas")
       .then((res) => res.json())
@@ -155,23 +149,23 @@ export default function NCheck() {
       .catch((err) => console.error("❌ Error cargando plantillas:", err));
   }, []);
 
-    const handleCreateTemplate = () => {
-      setLoading(true);
-      setTimeout(() => {
-      navigate("/cPlant");
-      }, 300);
-    };
-    const History = () => {
-      setLoading(true);
-      setTimeout(() => {
-      navigate("/hCheck");
-      }, 300);
-    };
-    const handleInputChange = (fieldId, value) => {
-      setFormData(prevData => ({
-        ...prevData,
-        [fieldId]: value
-      }));
+  const handleCreateTemplate = () => {
+    setLoading(true);
+    setTimeout(() => {
+    navigate("/cPlant");
+    }, 300);
+  };
+  const History = () => {
+    setLoading(true);
+    setTimeout(() => {
+    navigate("/hCheck");
+    }, 300);
+  };
+  const handleInputChange = (fieldId, value) => {
+    setFormData(prevData => ({
+      ...prevData,
+      [fieldId]: value
+  }));
       setSelectedTemplate(prev => {
         if (!prev) return prev;
         return {
@@ -185,52 +179,48 @@ export default function NCheck() {
         };
       });
     };
-    const handleCheckboxChange = (fieldId, newValue) => {
-      setSelectedTemplate(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          estructura_json: (prev.estructura_json ?? []).map(group => ({
-            ...group,
-            fields: (group.fields ?? []).map(field =>
-              field.id === fieldId ? { ...field, cB: newValue } : field
-            ),
-          })),
-        };
-      });
-    };
-    // Función para guardar la firma en el campo correspondiente
-    const updateFieldValue = (fieldId, value) => {
-      setSelectedTemplate((prev) => {
-        if (!prev) return prev;
-
+  const handleCheckboxChange = (fieldId, newValue) => {
+    setSelectedTemplate(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        estructura_json: (prev.estructura_json ?? []).map(group => ({
+          ...group,
+          fields: (group.fields ?? []).map(field =>
+            field.id === fieldId ? { ...field, cB: newValue } : field
+          ),
+        })),
+      };
+    });
+  };
+  // Función para guardar la firma en el campo correspondiente
+  const updateFieldValue = (fieldId, value) => {
+    setSelectedTemplate((prev) => {
+      if (!prev) return prev;
         const newEstructura = (prev.estructura_json ?? []).map((group) => ({
           ...group,
           fields: (group.fields ?? []).map((f) =>
             f.id === fieldId ? { ...f, value } : f
-          ),
-        }));
-
-        return { ...prev, estructura_json: newEstructura };
-      });
-    };
-    //funcion para modificar el value
-    const updateFieldFull = (fieldId, updatedProps) => {
-      setSelectedTemplate((prev) => {
-        if (!prev) return prev;
-
+        ),
+      }));
+      return { ...prev, estructura_json: newEstructura };
+    });
+  };
+  //funcion para modificar el value
+  const updateFieldFull = (fieldId, updatedProps) => {
+    setSelectedTemplate((prev) => {
+      if (!prev) return prev;
         const newEstructura = (prev.estructura_json ?? []).map((group) => ({
           ...group,
           fields: (group.fields ?? []).map((f) =>
             f.id === fieldId ? { ...f, ...updatedProps } : f
           ),
         }));
-
-        return { ...prev, estructura_json: newEstructura };
-      });
-    };
-    //Validacion del Require   
-    const validarCampo = (field) => {
+      return { ...prev, estructura_json: newEstructura };
+    });
+  };
+  //Validacion del Require   
+  const validarCampo = (field) => {
       if (!field.required) return true;
 
       switch (field.type) {
@@ -270,11 +260,9 @@ export default function NCheck() {
         default:
           return true;
       }
-    };
-
-
-    // Render para formulario
-    const renderField = (field, updateField, updateFieldValue, handleInputChange) => {
+  };
+  // Render para formulario
+  const renderField = (field, updateField, updateFieldValue, handleInputChange) => {
         switch (field.type) {
 
       case "Texto":
@@ -741,9 +729,9 @@ export default function NCheck() {
       default:
         return <div className="text-red-500">Tipo no soportado: {field.type}</div>;
     }
-    };
-    //Guardado
-    const handleSave = async () => {
+  };
+  //Guardado
+  const handleSave = async () => {
         if (!selectedTemplate) {
           alert("No hay plantilla seleccionada");
           return;
@@ -810,8 +798,8 @@ export default function NCheck() {
         } catch (err) {
           console.error(err);
         }
-    };
-    useEffect(() => {
+  };
+  useEffect(() => {
       if (checklistId) {
         const fetchChecklist = async () => {
           try {
@@ -835,13 +823,14 @@ export default function NCheck() {
 
         fetchChecklist();
       }
-    }, [checklistId]);
+  }, [checklistId]);
     
   return (
-
     <div className="p-8 min-h-screen bg-gray-50">
       {/* Título */}
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Nuevo Checklist</h1>
+      <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">
+        Nuevo Checklist
+      </h2>
       {/* Botones principales */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
         {/* Botón abrir modal */}
@@ -852,7 +841,6 @@ export default function NCheck() {
           <FolderPlus className="w-10 h-10 text-blue-600 mb-3" />
           <span className="font-medium">Elegir Plantilla</span>
         </button>
-
         {/* Crear plantilla */}
         <button 
           className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
@@ -861,17 +849,14 @@ export default function NCheck() {
           <FilePlus className="w-10 h-10 text-green-600 mb-3" />
           <span className="font-medium">Crear Plantilla</span>
         </button>
-
         {/* Guardar borrador */}
-<button
-  className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
+        <button
+          className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
           onClick={handleSave}
         >
           <Save className="w-10 h-10 text-orange-400 mb-3" />
           <span className="font-medium">Guardar Checklist</span>
-</button>
-
-
+        </button>
         {/* Generar PDF */}
         <button
           className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
@@ -882,7 +867,7 @@ export default function NCheck() {
         </button>
       </div>
         {/* Contenedor del formulario dinámico */}
-          <div className="mt-6 p-6 bg-white rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition">
+      <div className="mt-6 p-6 bg-white rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition">
       {!selectedTemplate ? (
         <p className="text-gray-500">Seleccione una plantilla para comenzar.</p>
       ) : (
@@ -913,10 +898,10 @@ export default function NCheck() {
           )}
         </>
       )}
-    </div>
+      </div>
       {/* Modal */}
       <TemplatesModal
-        isOpen={modalOpen}
+        visible={modalOpen}
         onClose={() => setModalOpen(false)}
         templates={plantillas}
         onSelect={(tpl) => {
@@ -944,7 +929,7 @@ export default function NCheck() {
             <h2 className="text-lg font-semibold text-gray-800 mb-3">Firmar</h2>
 
             <SignaturePad
-              width={480}   // se ve bien en PC y móvil
+              width={480}   
               height={220}
               onSave={(dataUrl) => {
                 updateFieldValue(activeSignatureField, dataUrl);
@@ -955,6 +940,7 @@ export default function NCheck() {
           </div>
         </div>
       )}
+
       {user?.rol_id === 3 && (
       <Card className="mt-6">
         <CardHeader>
@@ -969,7 +955,6 @@ export default function NCheck() {
       </Card>
       )}
 
-      
       <form
       onSubmit={(e) => {
         e.preventDefault();
