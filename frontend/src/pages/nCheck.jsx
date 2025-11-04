@@ -15,10 +15,11 @@ import Banner from "../components/Banner";
 
 //Funciones 
   // TextoSiNo.jsx
-    function TextoSiNo({ field, updateFieldValue }) {
+    function TextoSiNo({ field, updateFieldValue, submitted}) {
       const [value, setValue] = useState(field.cB ?? ""); // Valor del Sí/No
       const [textValue, setTextValue] = useState(field.value ?? ""); // Valor del texto
       const [touched, setTouched] = useState(false); // Para validar si el usuario ya interactuó
+      const showError = (touched || submitted) && !textValue.trim();
 
       // Función para limitar a 100 palabras
       const handleTextChange = (e) => {
@@ -27,10 +28,6 @@ import Banner from "../components/Banner";
         setTextValue(limitedWords);
         updateFieldValue(field.id, { ...field, value: limitedWords });
       };
-
-      const showError = touched && !textValue.trim(); // Error si está vacío y se tocó
-
-
 
       return (
         <div
@@ -89,9 +86,10 @@ import Banner from "../components/Banner";
       );
     } 
     // CheckboxField.jsx
-    function CheckboxField({ field, handleChange, submitted, camposConError }) {
-      const value = field.cB ?? "";
-      const showError = submitted && camposConError.includes(field.id);
+    function CheckboxField({ field, handleChange, submitted}) {
+      const [value, setValue] = useState(field.cB ?? "");
+      const [touched, setTouched] = useState(false); 
+      const showError = (touched || submitted) && !value.trim();
 
       return (
         <div
@@ -102,23 +100,29 @@ import Banner from "../components/Banner";
           <span className="text-base sm:text-lg font-semibold text-gray-800">{field.label}</span>
 
           <div className="flex items-center gap-4 sm:gap-6">
-            {/* Opción Sí */}
             <label
               className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base ${
                 value === "si" ? "bg-green-100 border border-green-400" : "hover:bg-gray-100"
               }`}
-              onClick={() => handleChange(field.id, "si")}
+              onClick={() => {
+                setValue("si");
+                handleChange(field.id, { ...field, cB: "si" });
+                setTouched(true);
+              }}
             >
               <Checkbox checked={value === "si"} readOnly />
               <span className="text-gray-700 font-medium">Sí</span>
             </label>
 
-            {/* Opción No */}
             <label
               className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer transition text-sm sm:text-base ${
                 value === "no" ? "bg-red-100 border border-red-400" : "hover:bg-gray-100"
               }`}
-              onClick={() => handleChange(field.id, "no")}
+              onClick={() => {
+                setValue("no");
+                handleChange(field.id, { ...field, cB: "no" });
+                setTouched(true);
+              }}
             >
               <Checkbox checked={value === "no"} readOnly />
               <span className="text-gray-700 font-medium">No</span>
@@ -131,21 +135,18 @@ import Banner from "../components/Banner";
 export default function NCheck() {
   const navigate = useNavigate();
   const [selectedTemplate, setSelectedTemplate] = useState({ fields: [], estructura_json: []  });
-  const [recommendation, setRecommendation] = useState("");
   const [activeSignatureField, setActiveSignatureField] = useState(null);
-  const [formData, setFormData] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [plantillas, setPlantillas] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [templateName, setTemplateName] = useState("");
   const [loading, setLoading] = useState(false);
   const { user } = useContext(UserContext);
-  const [selectedVehicle, setSelectedVehicle] = useState(null);
   const location = useLocation();
   const checklistId = location.state?.checklistId;
   const [camposConError, setCamposConError] = useState([]);
   const [banner, setBanner] = useState(null);
   const [bannerType, setBannerType] = useState("success");
+
 
   useEffect(() => {
     fetch("http://localhost:3000/api/plantillas")
@@ -153,7 +154,6 @@ export default function NCheck() {
       .then((data) => setPlantillas(data))
       .catch((err) => console.error("❌ Error cargando plantillas:", err));
   }, []);
-
   const handleCreateTemplate = () => {
     setLoading(true);
     setTimeout(() => {
@@ -166,24 +166,6 @@ export default function NCheck() {
     navigate("/hCheck");
     }, 300);
   };
-  const handleInputChange = (fieldId, value) => {
-    setFormData(prevData => ({
-      ...prevData,
-      [fieldId]: value
-  }));
-      setSelectedTemplate(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          fields: (prev.fields || []).map(group => ({
-            ...group,
-            fields: (group.fields || []).map(field =>
-              field.id === fieldId ? { ...field, value } : field
-            )
-          }))
-        };
-      });
-    };
   const handleCheckboxChange = (fieldId, newValue) => {
     setSelectedTemplate(prev => {
       if (!prev) return prev;
@@ -225,9 +207,8 @@ export default function NCheck() {
     });
   };
     // Render para formulario
-  const renderField = (field, updateField, updateFieldValue, handleInputChange) => {
-        switch (field.type) {
-
+  const renderField = (field, updateField, updateFieldValue) => {
+    switch (field.type) {
       case "Texto":
         return (
           <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
@@ -510,7 +491,11 @@ export default function NCheck() {
         );
       case "Firma":
         return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
+          <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
+              submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
+            }`}
+          >
+            
             <label className="text-base sm:text-lg font-semibold text-gray-800">
               {field.label}
             </label>
@@ -556,7 +541,7 @@ export default function NCheck() {
       case "Firma + Texto":
         return (
           <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
-              submitted && camposConError.includes(field.id) ? "border-red-500" : "border-gray-300"
+              submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
             }`}
           >
             <label className="text-base sm:text-lg font-semibold text-gray-800">
@@ -623,7 +608,7 @@ export default function NCheck() {
       case "Imágenes tipo lista":
         return (
           <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
-              submitted && camposConError.includes(field.id) ? "border-red-500" : "border-gray-300"
+              submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
             }`}
           >
             <label className="text-base sm:text-lg font-semibold text-gray-800">
@@ -664,113 +649,109 @@ export default function NCheck() {
             )}
           </div>
         );
-      case "Recomendación Inteligente (IA)":
-        return (
-          <div className="flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border border-gray-200">
-            <label className="text-base sm:text-lg font-semibold text-gray-800">
-              {field.label}
-            </label>
-            <div className="p-3 bg-gray-100 rounded-xl border text-gray-600 italic text-sm sm:text-base">
-              {recommendation || field.value || "La IA aún no ha generado una recomendación..."}
-            </div>
-          </div>
-        );
       case "Checkbox":
         return (
           <CheckboxField
             field={field}
             handleChange={handleCheckboxChange}
+            submitted={submitted}
           />
         );
       case "Texto + Si/No":
         return (
           <TextoSiNo
             field={field}
-            updateFieldValue={updateFieldFull} // 👈 este es el que maneja { cB, value }
+            updateFieldValue={updateFieldFull}
+            submitted={submitted}
           />
         );
       default:
         return <div className="text-red-500">Tipo no soportado: {field.type}</div>;
     }
   };
-  //Validacion del Require  
+  
   const validarCampo = (field) => {
-      if (!field.required) return true;
+    if (!field.required) return true; // si no es obligatorio, no se valida
 
-      switch (field.type) {
-        case "Texto":
-        case "Comentario":
-          return field.value && String(field.value).trim() !== "";
-        case "Numérico":
-        case "Kilometraje":
-          return field.value !== null && field.value !== undefined && field.value !== "";
+    const v = field.value;
+    let esValido = true;
 
-        case "Lista":
-          return field.value && field.value !== "";
+    switch (field.type) {
+      case "Texto":
+      case "Comentario":
+        esValido = v !== null && v !== undefined && String(v).trim() !== "";
+        break;
 
-        case "Selección Múltiple":
-          return Array.isArray(field.value) && field.value.length > 0;
-        case "Imágenes tipo lista":
-          return field.value && field.value !== "";
+      case "Numérico":
+      case "Kilometraje":
+        esValido = v !== null && v !== undefined && v !== "" && !isNaN(v);
+        break;
 
-        case "Firma":
-          return field.value && field.value !== "";
+      case "Lista":
+        esValido = v !== null && v !== undefined && v !== "";
+        break;
 
-        case "Firma + Texto":
-          return field.value && field.value !== "" && field.com && field.com.trim() !== "";
+      case "Selección Múltiple":
+        esValido = Array.isArray(v) && v.length > 0;
+        break;
 
-        case "Fechas":
-          return field.value && field.value !== "";
+      case "Imágenes tipo lista":
+      case "Firma":
+      case "Hora":
+      case "Recomendación Inteligente (IA)":
+      case "Fechas":
+        esValido = v !== null && v !== undefined && v !== "";
+        break;
 
-        case "FechasP":
-          return field.startDate && field.endDate && field.startDate !== "" && field.endDate !== "";
+      case "Firma + Texto":
+        esValido =
+          v !== null &&
+          v !== undefined &&
+          v !== "" &&
+          field.com &&
+          field.com.trim() !== "";
+        break;
 
-        case "Hora":
-          return field.value && field.value !== "";
+      case "FechasP":
+        esValido =
+          field.startDate &&
+          field.endDate &&
+          field.startDate !== "" &&
+          field.endDate !== "";
+        break;
 
-        case "Recomendación Inteligente (IA)":
-          return field.value && field.value !== "";
-
-        default:
-          return true;
-      }
+      default:
+        esValido = true;
+    }
+    return esValido;
   };
-  //Guardado
-  const handleSave = async () => {
-          if (
-            !selectedTemplate ||
-            !selectedTemplate.id || // no tiene id
-            selectedTemplate.estructura_json.length === 0 // no tiene estructura
-          ) {
-            showBanner("Plantilla no Seleccionada", "error");
-            return;
-          }
-          setSubmitted(true);
-          // Extraer la placa y conductor del template, si existen
-          const fields = selectedTemplate.estructura_json.flatMap(group => group.fields);
-          
+    //Guardado
+    const handleSave = async () => {
+        // Verificamos plantilla
+        if (
+          !selectedTemplate ||
+          !selectedTemplate.id ||
+          !Array.isArray(selectedTemplate.estructura_json) ||
+          selectedTemplate.estructura_json.length === 0
+        ) {
+          showBanner("Plantilla no Seleccionada", "error");
+          return;
+        }
+        setSubmitted(true);
 
-          // Validación de campos obligatorios
-            let errores = 0;
-            const camposInvalidos = [];
-            
-            fields.forEach(f => {
-              const puntos = validarCampo(f);
-              if (puntos > 0) {
-                errores += puntos;
-                camposInvalidos.push(f.label);
-              }
-            });
-            
+        // Extraer los campos de todos los grupos
+        const fields = selectedTemplate.estructura_json.flatMap(group => group.fields || []); 
 
-            if (errores > 0) {
-              setCamposConError(camposInvalidos);
-              showBanner(`Complete los campos obligatorios`, "error");
-              return; // 🔴 detener guardado
-            }
+        // Validación de campos obligatorios
+        const camposInvalidos = fields.filter(f => !validarCampo(f));
 
-            setCamposConError([]); // limpiar errores si todo está correcto
-
+        if (camposInvalidos.length > 0) {
+          setCamposConError(camposInvalidos.map(f => f.label));
+          showBanner("Complete los campos obligatorios antes de guardar", "error");
+          return; // 🚫 Detener guardado
+        }
+        setCamposConError([]); 
+          //
           const placaField = fields.find(f => f.label === "Placa")?.value ?? null;
           const conductorField = fields.find(f => f.label === "Conductor")?.value ?? null;
 
@@ -823,6 +804,7 @@ export default function NCheck() {
             console.error(err);
           }
     };
+    
   useEffect(() => {
       if (checklistId) {
         const fetchChecklist = async () => {
@@ -849,11 +831,11 @@ export default function NCheck() {
       }
   }, [checklistId]);
 
-    const showBanner = (message, type = "info") => {
+  const showBanner = (message, type = "info") => {
         setBanner(message);
         setBannerType(type);
         setTimeout(() => setBanner(null), 1500);
-    };
+  };
     
   return (
     <div className="p-8 min-h-screen bg-gray-50">
@@ -915,7 +897,7 @@ export default function NCheck() {
                 {Array.isArray(group.fields) && group.fields.length > 0 ? (
                   group.fields.map((field, fi) => (
                     <div key={field.id ?? `field-${gi}-${fi}`} className="mb-3">
-                      {renderField(field, updateFieldFull, updateFieldValue, handleInputChange)}
+                      {renderField(field, updateFieldFull, updateFieldValue)}
                     </div>
                   ))
                 ) : (

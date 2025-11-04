@@ -1,5 +1,5 @@
 // generatePDFFromJSON.js
-import * as fontkit from "fontkit";
+
 export const generatePDFFromJSON = (checklistJSON) => {
   const content = {};
   
