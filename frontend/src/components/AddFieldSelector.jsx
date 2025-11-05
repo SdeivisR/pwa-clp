@@ -16,7 +16,7 @@ const FIELD_TYPES = [
   "Firma",
   "Firma + Texto",
   "Hora",
-  "Imágenes tipo lista",
+  "Imágenes Marcadas",
   "Kilometraje",
   "Lista",
   "Numérico",
@@ -156,10 +156,9 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
                     </div>
                   </div>
                 )}  
-                {field.type === "Comentario" && (
+                {field.type === "Comentario" && ( 
                   <Textarea placeholder="Escribe comentario..." disabled className="bg-gray-100 cursor-not-allowed"/>
                 )}
-
                 {/* Lista editable */}
                 {field.type === "Lista" && (
                   <div className="flex flex-col gap-2">
@@ -250,100 +249,22 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
                     </button>
                   </div>
                 )}
+                {field.type === "Imagenes Marcadas" && (
+                  <div className="flex flex-col gap-3 border rounded-xl p-3 bg-gray-50">
+                    <p className="font-semibold text-gray-700">Opciones disponibles:</p>
 
-                {/* Imagenes tipo Lista */}
-                {field.type === "Imágenes tipo lista" && (
-                  <div className="flex flex-col gap-2">
-                    {field.items?.map((item, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        {/* Campo de texto */}
-                        <input
-                          type="text"
-                          value={item.label}
-                          onChange={(e) =>
-                            updateField(groupIndex, fieldIndex, {
-                              ...field,
-                              items: field.items.map((it, idx) =>
-                                idx === i
-                                  ? {
-                                      ...it,
-                                      label: e.target.value,
-                                      value: e.target.value.toLowerCase(),
-                                    }
-                                  : it
-                              ),
-                            })
-                          }
-                          className="border-b border-gray-300 flex-1"
-                          placeholder="Texto del item"
-                        />
-
-                        {/* Campo para URL de la imagen */}
-                        <input
-                          type="text"
-                          value={item.imageUrl || ""}
-                          onChange={(e) =>
-                            updateField(groupIndex, fieldIndex, {
-                              ...field,
-                              items: field.items.map((it, idx) =>
-                                idx === i ? { ...it, imageUrl: e.target.value } : it
-                              ),
-                            })
-                          }
-                          className="border-b border-gray-300 flex-1"
-                          placeholder="URL de la imagen"
-                        />
-
-                        {/* Preview de la imagen si existe */}
-                        {item.imageUrl && (
-                          <img
-                            src={item.imageUrl}
-                            alt={item.label}
-                            className="w-20 h-20 object-cover rounded"
-                          />
-                        )}
-
-                        <button
-                          onClick={() =>
-                            updateField(groupIndex, fieldIndex, {
-                              ...field,
-                              items: field.items.filter((_, idx) => idx !== i),
-                            })
-                          }
-                          className="text-red-500"
+                    <div className="grid grid-cols-2 gap-2">
+                      {["Auto", "Camioneta", "Van", "Camión ligero", "Bus", "Auto eléctrico", "Deportivo"].map((opcion, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-center border rounded-lg px-3 py-2 bg-white shadow-sm"
                         >
-                          Eliminar
-                        </button>
-                      </div>
-                    ))}
-
-                    <button
-                      onClick={() =>
-                        updateField(groupIndex, fieldIndex, {
-                          ...field,
-                          items: [
-                            ...(field.items || []),
-                            {
-                              value: `item${Date.now()}`,
-                              label: "Nuevo item",
-                              imageUrl: "",
-                            },
-                          ],
-                        })
-                      }
-                      className="text-blue-500"
-                    >
-                      + Agregar item
-                    </button>
+                          <span className="text-gray-700">{opcion}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
-
-                {field.type === "Recomendación Inteligente (IA)" && (
-                  <div className="p-2 border rounded-md bg-muted text-gray-600">
-                    ⚡ Aquí se mostrará una recomendación generada por IA
-                  </div>
-                )}
-
                 {field.type === "Firma" && (
                   <div className="border rounded-lg p-2 bg-white">
                     <SignatureCanvas
@@ -458,8 +379,6 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
                     />
                   </div>
                 )}
-
-
               </AccordionContent>
             </AccordionItem>
           ))}

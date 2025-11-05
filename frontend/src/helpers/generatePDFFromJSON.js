@@ -63,30 +63,29 @@ export const generatePDFFromJSON = (checklistJSON) => {
       return field;
     }
 
-    // Imágenes tipo lista
     if (type === "Imágenes tipo lista") {
-      let images = [];
+          let images = [];
 
-      // Si existe un subgrupo con items definidos
-      if (Array.isArray(block.items) && block.value) {
-        const match = block.items.find((item) => item.value === String(block.value));
-        if (match && match.imageUrl) {
-          images = [match.imageUrl]; // Guardamos la URL encontrada
+          // Si existe un subgrupo con items definidos
+          if (Array.isArray(block.items) && block.value) {
+            const match = block.items.find((item) => item.value === String(block.value));
+            if (match && match.imageUrl) {
+              images = [match.imageUrl]; // Guardamos la URL encontrada
+            }
+          } 
+          // Si ya vienen como imágenes directas (por ejemplo base64 o array de urls)
+          else if (Array.isArray(block.images)) {
+            images = block.images;
+          } else if (Array.isArray(block.value)) {
+            images = block.value;
+          } else if (block.value) {
+            images = [block.value];
+          }
+
+          field.type = "Imágenes tipo lista";
+          field.images = images;
+          return field;
         }
-      } 
-      // Si ya vienen como imágenes directas (por ejemplo base64 o array de urls)
-      else if (Array.isArray(block.images)) {
-        images = block.images;
-      } else if (Array.isArray(block.value)) {
-        images = block.value;
-      } else if (block.value) {
-        images = [block.value];
-      }
-
-      field.type = "Imágenes tipo lista";
-      field.images = images;
-      return field;
-    }
 
     // Firma + Texto
     if (type === "Firma + Texto" || type === "FirmText") {
@@ -115,11 +114,10 @@ export const generatePDFFromJSON = (checklistJSON) => {
       field.label = block.label ?? null;
       return field;
     }
-
-    // Default: cualquier otro tipo -> value directo
-    field.value = block.value ?? null;
-    return field;
-  };
+      // Default: cualquier otro tipo -> value directo
+      field.value = block.value ?? null;
+      return field;
+    };
 
   // Procesa un objeto "grupo" (obj con keys -> blocks) y devuelve array de fields
   const processGroupObj = (groupObj) => {

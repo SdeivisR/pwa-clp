@@ -8,6 +8,7 @@ import { Input } from "../components/ui/input";
 import { Checkbox } from "../components/ui/checkbox";
 import { Textarea } from "../components/ui/textarea";
 import SignaturePad from "@/components/SignaturePad"; 
+import ImagenPad from "@/components/ImagenPad"; 
 import Spinner from "../components/Spinner";
 import { UserContext } from "../context/UserContext";
 import Banner from "../components/Banner";
@@ -136,6 +137,7 @@ export default function NCheck() {
   const navigate = useNavigate();
   const [selectedTemplate, setSelectedTemplate] = useState({ fields: [], estructura_json: []  });
   const [activeSignatureField, setActiveSignatureField] = useState(null);
+  const [activeImagenField, setActiveImagenField] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [plantillas, setPlantillas] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -605,47 +607,52 @@ export default function NCheck() {
             )}
           </div>
         );
-      case "Imágenes tipo lista":
+      case "Imágenes Marcadas":
         return (
           <div className={`flex flex-col gap-2 w-full p-3 sm:p-4 rounded-2xl shadow-sm bg-white border ${
               submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
             }`}
           >
+            
             <label className="text-base sm:text-lg font-semibold text-gray-800">
               {field.label}
             </label>
 
-            {/* Opciones como botones */}
-            <div className="flex flex-col gap-1">
-              {field.items?.map((item, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => updateFieldValue(field.id, item.value)}
-                  className={`text-left px-2 py-1 border rounded text-sm sm:text-base transition ${
-                    field.value === item.value
-                      ? "border-blue-400 font-medium"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
-            {field.value && (
-              <div className="mt-3 flex justify-center">
+            {field.value ? (
+              <div className="relative">
                 <img
-                  src={field.items.find((i) => i.value === field.value)?.imageUrl}
-                  alt="Imagen seleccionada"
-                  className={`w-full rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition px-3 py-2 text-sm sm:text-base pr-12 ${
-                      submitted && (!field.value || field.value.trim() === "") ? "border-red-500" : "border-gray-300"
-                    }`}
-                  />
-                  {submitted && (!field.value || field.value.trim() === "") ? (
-                    <p className="text-red-500 text-sm">Este campo es obligatorio</p>
-                  ) : null}
+                  src={field.value}
+                  alt="Firma guardada"
+                  className="w-full h-32 object-contain border rounded-lg bg-gray-50"
+                />
+                <div className="absolute top-2 right-2 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveImagenField(field.id)}
+                    className="p-2 text-blue-500 hover:text-blue-700 transition-colors"
+                    title="Rehacer"
+                  >
+                    <RefreshCw className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateFieldValue(field.id, null)}
+                    className="p-2 text-red-500 hover:text-red-700 transition-colors"
+                    title="Borrar"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setActiveImagenField(field.id)}
+                className="w-full h-32 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50"
+              >
+                Toca aquí para firmar
+              </button>
+
             )}
           </div>
         );
@@ -952,6 +959,24 @@ export default function NCheck() {
           </div>
         </div>
       )}
+      {activeImagenField && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-lg p-4 w-[92%] max-w-[520px]">
+            <h2 className="text-lg font-semibold text-gray-800 mb-3">Dibujar</h2>
+
+            <ImagenPad
+              width={485}   
+              height={350}
+              onSave={(dataUrl) => {
+                updateFieldValue(activeImagenField, dataUrl);
+                setActiveImagenField(null);
+              }}
+              onCancel={() => setActiveImagenField(null)}
+            />
+          </div>
+        </div>
+      )}
+
 
       {user?.rol_id === 3 && (
       <Card className="mt-6">
