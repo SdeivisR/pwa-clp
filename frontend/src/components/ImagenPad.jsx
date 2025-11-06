@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { Trash2, Save, X, Image as ImageIcon } from "lucide-react";
 
+
 const ImagenPad = ({
   width = 400,
   height = 200,
@@ -132,12 +133,12 @@ return (
           }}
           disabled={isLocked}
         >
-          <option value="">Seleccionar fondo...</option>
-          <option value="/fondos/carro_frontal.png">Carro (Frontal)</option>
-          <option value="/fondos/carro_lateral.png">Carro (Lateral)</option>
-          <option value="/fondos/carro_posterior.png">Carro (Posterior)</option>
-          <option value="/fondos/van.png">Van</option>
-          <option value="/fondos/camion.png">Camión</option>
+          <option value="">Seleccionar vehiculo...</option>
+          <option value="../images/vehiculos/check.png">Auto</option>
+          <option value="../images/vehiculos/check.png">Camioneta</option>
+          <option value="../images/vehiculos/check.png">Van/Minivan</option>
+          <option value="../images/vehiculos/check.png">Bus</option>
+          <option value="../images/vehiculos/check.png">Camión</option>
           <option value="custom">Subir imagen...</option>
         </select>
 

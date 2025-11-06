@@ -242,13 +242,13 @@ export const generatePDF = async ({ title, content = {}, logoPath = "/images/log
 
     if (type === "Firma" || type === "FirmText") {
       // estimación base: label + firma pequeña
-      return 18 /*label*/ + 8 /*gap*/ + 48 /*firma estimada*/;
+      return 95 ;
     }
-    if (type === "Imágenes tipo lista") {
-      const count = field.images?.length || 0;
-      // cada imagen ~ 70-90 px dependiendo de escala
-      return 18 + Math.max(0, count) * 80;
+    if (type === "Imágenes Marcadas") {
+      // estimación base: label + firma pequeña
+      return 150 ;
     }
+
     if (type === "Kilometraje") {
     const safeText = `${field.label || ""}: ${field.value ?? ""} KM`;
     const lines = splitText(safeText, colWidth - 20, font, fontSize);
@@ -264,11 +264,12 @@ export const generatePDF = async ({ title, content = {}, logoPath = "/images/log
   const drawFieldInCell = async (field, x, yTop, colWidth, rowHeight, font, fontSize = 11, page, pdfDoc = null) => {
   const type = field.type ?? "Texto";
   const padding = 8;
+
   if (type === "Firma" || type === "FirmText") {
     const label = `${field.label || ""}${type === "FirmText" && field.com ? ` - ${field.com}` : ""}`;
     page.drawText(label, { 
-      x: x + padding, 
-      y: yTop - padding - (fontSize), 
+      x: x + padding - 2 , 
+      y: yTop - padding - (fontSize) + 4 , 
       size: fontSize, 
       font: unicodeFont
     });
@@ -291,9 +292,9 @@ export const generatePDF = async ({ title, content = {}, logoPath = "/images/log
           
           page.drawImage(image, { 
             x: imgX, 
-            y: imgY -12,
-            width: dims.width, 
-            height: dims.height });
+            y: imgY - 6 ,
+            width: dims.width - 12, 
+            height: dims.height - 12 });
         }
       } catch {
         page.drawText("(Firma inválida)", { 
@@ -306,42 +307,45 @@ export const generatePDF = async ({ title, content = {}, logoPath = "/images/log
     }
     return;
   }
-  if (type === "Imágenes tipo lista") {
-    let yCursor = yTop - padding - fontSize;
-    for (const img of field.images ?? []) {
-      if (img && typeof img === "string" && img.startsWith("data:image")) {
-        try {
-          const bytes = Uint8Array.from(atob(img.split(",")[1]), c => c.charCodeAt(0));
-          const image = await pdfDoc.embedPng(bytes).catch(() => pdfDoc.embedJpg(bytes));
-          if (!image) { yCursor -= (fontSize + 6); continue; }
+  if (type === "Imágenes Marcadas") {
+    const imgBase64 = field.value;
+    if (imgBase64 && imgBase64.startsWith("data:image")) {
+      try {
+        const bytes = Uint8Array.from(atob(imgBase64.split(",")[1]), c => c.charCodeAt(0));
+        const image = await pdfDoc.embedPng(bytes).catch(() => pdfDoc.embedJpg(bytes));
 
+        if (image) {
+          // 🔹 Definimos el espacio disponible (ancho de la columna)
           const maxW = colWidth - padding * 2;
-          const maxH = rowHeight - padding * 2;
-          const scale = Math.min(maxW / image.width, maxH / image.height, 0.6, 1);
-          const dims = image.scale(scale);
 
-          // 📌 centrado en X
-          const offsetX = x + (colWidth - dims.width) / 2;
+          // 🔹 Mantenemos el formato cuadrado (altura = ancho)
+          const squareSize = maxW - 110;
 
-          page.drawImage(image, { 
-            x: offsetX, 
-            y: Math.max(yCursor - dims.height, yTop - rowHeight + padding),
-            width: dims.width, 
-            height: dims.height 
+          // 🔹 Calculamos posición centrada dentro de la celda
+          const imgX = x + (colWidth - squareSize) / 2;
+          const imgY = yTop - rowHeight + padding;
+
+          // 🔹 Dibujamos la imagen con proporción cuadrada
+          page.drawImage(image, {
+            x: imgX - 10,
+            y: imgY - 6,
+            width: squareSize,
+            height: squareSize
           });
-
-          yCursor -= dims.height + 8;
-        } catch {
-          page.drawText("(Imagen inválida)", { x: x + padding, y: yCursor, size: 10, font });
-          yCursor -= 14;
         }
-      } else {
-        page.drawText(String(img), { x: x + padding, y: yCursor, size: 10, font });
-        yCursor -= fontSize + 6;
+      } catch {
+        page.drawText("(Firma inválida)", {
+          x: x + padding,
+          y: yTop - rowHeight / 2,
+          size: 10,
+          font,
+          color: rgb(0.7, 0, 0)
+        });
       }
     }
     return;
   }
+
   // --- TEXTO NORMAL ---
     const label = field.label ? field.label.trim() : "";
     const value = field.value ? String(field.value).trim() : "";
@@ -449,7 +453,6 @@ export const generatePDF = async ({ title, content = {}, logoPath = "/images/log
 
       return;
     }
-
 
     // Dividir en líneas de máximo 70 caracteres
     const MAX_CHARS = 70;

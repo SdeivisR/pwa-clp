@@ -11,10 +11,10 @@ export const generatePDFFromJSON = (checklistJSON) => {
 
   // separamos normales y medias
   const normales = fields.filter(
-    f => f.type !== "Imágenes tipo lista" && f.type !== "Firma" && f.type !== "FirmText"
+    f => f.type !== "Imágenes Marcadas" && f.type !== "Firma" && f.type !== "FirmText" 
   );
   const medias = fields.filter(
-    f => f.type === "Imágenes tipo lista" || f.type === "Firma" || f.type === "FirmText"
+    f => f.type === "Imágenes Marcadas" || f.type === "Firma" || f.type === "FirmText" 
   );
 
   // ⚠️ Si los normales son impares → empujamos un campo vacío como "relleno"
@@ -63,30 +63,6 @@ export const generatePDFFromJSON = (checklistJSON) => {
       return field;
     }
 
-    if (type === "Imágenes tipo lista") {
-          let images = [];
-
-          // Si existe un subgrupo con items definidos
-          if (Array.isArray(block.items) && block.value) {
-            const match = block.items.find((item) => item.value === String(block.value));
-            if (match && match.imageUrl) {
-              images = [match.imageUrl]; // Guardamos la URL encontrada
-            }
-          } 
-          // Si ya vienen como imágenes directas (por ejemplo base64 o array de urls)
-          else if (Array.isArray(block.images)) {
-            images = block.images;
-          } else if (Array.isArray(block.value)) {
-            images = block.value;
-          } else if (block.value) {
-            images = [block.value];
-          }
-
-          field.type = "Imágenes tipo lista";
-          field.images = images;
-          return field;
-        }
-
     // Firma + Texto
     if (type === "Firma + Texto" || type === "FirmText") {
       field.type = "FirmText";
@@ -97,6 +73,10 @@ export const generatePDFFromJSON = (checklistJSON) => {
 
     // Firma sola
     if (type === "Firma") {
+      field.value = block.value ?? null;
+      return field;
+    }
+        if (type === "Imágenes Marcadas") {
       field.value = block.value ?? null;
       return field;
     }
