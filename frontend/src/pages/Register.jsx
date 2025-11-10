@@ -94,9 +94,7 @@ const handleLogin = async (e) => {
     
     localStorage.setItem("usuario", JSON.stringify(data.user));
     console.log("📦 Usuario guardado en localStorage:", data.user);
-    
     setUser(data.user);
-
     navigate("/home");
 
   } catch (err) {
@@ -109,7 +107,7 @@ const handleLogin = async (e) => {
 return (
   <div
     className="h-screen w-screen flex items-center justify-center bg-gray-100 bg-cover bg-center relative"
-    style={{ backgroundImage: "url('./src/assets/login-bg.jpg')" }}
+    style={{ backgroundImage: "url('../images/login-bg.jpg')" }}
   >
     {/* Overlay semitransparente */}
     <div className="absolute inset-0 bg-black opacity-30 z-0"></div>

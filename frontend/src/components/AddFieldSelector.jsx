@@ -66,49 +66,44 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
             key={fieldIndex}
             value={`field-${fieldIndex}`}
             className="border rounded-md"
-          >
-            <div className="flex items-center justify-between px-3 py-2">
-            <AccordionTrigger className="flex items-center justify-between px-3 py-2">
-              <div className="flex items-center gap-2 flex-1">
+        >
+          <div className="flex items-center justify-between px-2 py-1 gap-1 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-1 flex-1 min-w-0">
+              <input
+                type="text"
+                value={field.label}
+                onChange={(e) =>
+                  updateField(groupIndex, fieldIndex, {
+                    ...field,
+                    label: e.target.value,
+                  })
+                }
+                className="border-b border-gray-300 focus:outline-none flex-1 bg-transparent text-sm min-w-[80px]"
+                placeholder="Campo..."
+              />
+              <span className="text-gray-500 text-xs whitespace-nowrap">[{field.type}]</span>
+              <label className="flex items-center gap-[2px] text-xs text-gray-600 whitespace-nowrap">
                 <input
-                  type="text"
-                  value={field.label}
+                  type="checkbox"
+                  checked={field.required || false}
                   onChange={(e) =>
                     updateField(groupIndex, fieldIndex, {
                       ...field,
-                      label: e.target.value,
+                      required: e.target.checked,
                     })
                   }
-                  className="border-b border-gray-300 focus:outline-none flex-1 bg-transparent"
-                  placeholder="Título del campo..."
+                  className="scale-90"
                 />
-                <span className="text-gray-500 text-sm">[{field.type}]</span>
-                {/* Checkbox de requerido */}
-                  <label className="flex items-center gap-1 text-sm text-gray-600">
-                    <input
-                      type="checkbox"
-                      checked={field.required || false}
-                      onChange={(e) =>
-                        updateField(groupIndex, fieldIndex, {
-                          ...field,
-                          required: e.target.checked,
-                        })
-                      }
-                    />
-                    Requerido
-                  </label>
-              </div>
-            </AccordionTrigger>
-              {/* Botón eliminar separado */}
-                <button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-red-100 text-red-600 ml-2"
-                  onClick={() => removeField(groupIndex, fieldIndex)}
-                >
-                  <Trash2 size={16} />
-                </button>
+                Req.
+              </label>
             </div>
+            <button
+              onClick={() => removeField(groupIndex, fieldIndex)}
+              className="hover:bg-red-100 text-red-600 rounded p-1 flex-shrink-0"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
               <AccordionContent className="px-3 pb-3">
                 {field.type === "Texto" && (
                   <Input placeholder="Ingresa texto..." disabled className="bg-gray-100 cursor-not-allowed" />

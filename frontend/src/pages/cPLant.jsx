@@ -240,19 +240,21 @@ export default function ChecklistTemplateBuilder() {
 
   // 🔄 Drag & Drop
   const handleDragEnd = (result) => {
-    const { source, destination } = result;
+    const { source, destination, type } = result;
     if (!destination) return;
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    ) {
+
+    if (type === "group") {
+      const newGroups = Array.from(groups);
+      const [moved] = newGroups.splice(source.index, 1);
+      newGroups.splice(destination.index, 0, moved);
+      setGroups(newGroups);
       return;
     }
 
-    setGroups((prev) => {
-      const newGroups = [...prev];
-      const sourceGroupIndex = newGroups.findIndex((g) => g.id === source.droppableId);
-      const destGroupIndex = newGroups.findIndex((g) => g.id === destination.droppableId);
+    if (type === "field") {
+      const newGroups = [...groups];
+      const sourceGroupIndex = newGroups.findIndex(g => g.id === source.droppableId);
+      const destGroupIndex = newGroups.findIndex(g => g.id === destination.droppableId);
 
       const sourceFields = Array.from(newGroups[sourceGroupIndex].fields);
       const [movedItem] = sourceFields.splice(source.index, 1);
@@ -267,9 +269,10 @@ export default function ChecklistTemplateBuilder() {
         newGroups[destGroupIndex].fields = destFields;
       }
 
-      return newGroups;
-    });
+      setGroups(newGroups);
+    }
   };
+
   //Banners para botones
   const showBanner = (message, type = "info") => {
   setBanner(message);
@@ -452,85 +455,101 @@ export default function ChecklistTemplateBuilder() {
       </div>
       {/* Grupos */}
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="space-y-4">
-          {groups.map((group, groupIndex) => (
-            <Droppable droppableId={group.id} key={group.id}>
-              {(provided) => (
-                <Card
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="p-4 border rounded-lg"
-                >
-                  {/* Header */}
-                  <div className="flex justify-between items-center mb-2">
-                    <input
-                      type="text"
-                      value={group.name}
-                      onChange={(e) => updateGroupName(groupIndex, e.target.value)}
-                      className="font-semibold border-b border-gray-300 focus:outline-none flex-1 mr-2"
-                    />
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => moveGroup(groupIndex, "up")}
-                        disabled={groupIndex === 0}
-                      >
-                        <ArrowUp className="w-5 h-5 text-blue-600" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => moveGroup(groupIndex, "down")}
-                        disabled={groupIndex === groups.length - 1}
-                      >
-                        <ArrowDown className="w-5 h-5 text-blue-600" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeGroup(groupIndex)}
-                      >
-                        <Trash2 className="w-5 h-5 text-red-600" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Campos */}
-                  {moveMode ? (
-                    group.fields.map((field, fieldIndex) => (
-                      <Draggable key={field.id} draggableId={field.id} index={fieldIndex}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`p-2 mb-2 border rounded cursor-move ${
-                              snapshot.isDragging ? "bg-blue-100" : "bg-gray-50"
-                            }`}
+        <Droppable droppableId="all-groups" type="group">
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-4">
+              {groups.map((group, groupIndex) => (
+                <Draggable key={group.id} draggableId={group.id} index={groupIndex}>
+                  {(providedGroup) => (
+                    <div
+                      ref={providedGroup.innerRef}
+                      {...providedGroup.draggableProps}
+                      {...providedGroup.dragHandleProps}
+                    >
+                      <Droppable droppableId={group.id} type="field">
+                        {(providedField) => (
+                          <Card
+                            ref={providedField.innerRef}
+                            {...providedField.droppableProps}
+                            className="p-4 border rounded-lg w-full overflow-hidden"
                           >
-                            {field.label}
+                          {/* Header */}
+                          <div className="flex items-center justify-between mb-2 gap-2 min-w-0">
+                              <input
+                              type="text"
+                              value={group.name}
+                              onChange={(e) => updateGroupName(groupIndex, e.target.value)}
+                              className="font-semibold border-b border-gray-300 focus:outline-none flex-1 truncate min-w-0"
+                              />
+                              <div className="flex shrink-0 items-center gap-1 overflow-x-auto whitespace-nowrap">
+                              <button
+                                  className="p-1 rounded hover:bg-blue-100 flex-shrink-0"
+                                  onClick={() => moveGroup(groupIndex, 'up')}
+                                  disabled={groupIndex === 0}
+                              >
+                                  <ArrowUp className="w-4 h-4 text-blue-600" />
+                              </button>
+                              <button
+                                  className="p-1 rounded hover:bg-blue-100 flex-shrink-0"
+                                  onClick={() => moveGroup(groupIndex, 'down')}
+                                  disabled={groupIndex === groups.length - 1}
+                              >
+                                  <ArrowDown className="w-4 h-4 text-blue-600" />
+                              </button>
+                              <button
+                                  className="p-1 rounded hover:bg-red-100 flex-shrink-0"
+                                  onClick={() => removeGroup(groupIndex)}
+                              >
+                                  <Trash2 className="w-4 h-4 text-red-600" />
+                              </button>
+                              </div>
                           </div>
+                            {/* campos dentro */}
+                            {moveMode ? (
+                              group.fields.map((field, fieldIndex) => (
+                                <Draggable
+                                  key={field.id}
+                                  draggableId={field.id}
+                                  index={fieldIndex}
+                                >
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className={`p-2 mb-2 border rounded cursor-move w-full overflow-hidden text-ellipsis ${
+                                        snapshot.isDragging ? "bg-blue-100" : "bg-gray-50"
+                                      }`}
+                                    >
+                                      {field.label}
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))
+                            ) : (
+                              <AddFieldSelector
+                                groupIndex={groupIndex}
+                                groupFields={group.fields}
+                                addField={addField}
+                                updateField={updateField}
+                                removeField={removeField}
+                              />
+                            )}
+                            {providedField.placeholder}
+                          </Card>
                         )}
-                      </Draggable>
-                    ))
-                  ) : (
-                    <AddFieldSelector
-                      groupIndex={groupIndex}
-                      groupFields={group.fields}
-                      addField={addField}
-                      updateField={updateField}
-                      removeField={removeField}
-                    />
+                      </Droppable>
+                    </div>
                   )}
-
-                  {provided.placeholder}
-                </Card>
-              )}
-            </Droppable>
-          ))}
-        </div>
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
       </DragDropContext>
+
+
       {modalVisible && (
         <InputModal
           visible={modalVisible}

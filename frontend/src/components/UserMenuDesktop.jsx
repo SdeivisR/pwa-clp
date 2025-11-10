@@ -91,7 +91,7 @@ const userMenuDesktop = forwardRef(({ setShowUserMenu }, ref) => {
           onClick={() => setShowUserMenu(false)}
         >
           <Settings size={20} />
-          <span>Soporte / Manual</span>
+          <span>Soporte</span>
         </Link>
       </div>
 
