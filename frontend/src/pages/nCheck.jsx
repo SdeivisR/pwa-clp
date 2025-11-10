@@ -507,7 +507,7 @@ export default function NCheck() {
                 <img
                   src={field.value}
                   alt="Firma guardada"
-                  className="w-full h-32 object-contain border rounded-lg bg-gray-50"
+                  className="w-full h-64 object-contain border rounded-lg bg-gray-50"
                 />
                 <div className="absolute top-2 right-2 flex gap-2">
                   <button
@@ -574,7 +574,7 @@ export default function NCheck() {
                 <img
                   src={field.value}
                   alt="Firma guardada"
-                  className="w-full h-32 object-contain border rounded-lg bg-gray-50"
+                  className="w-full h-64 object-contain border rounded-lg bg-gray-50"
                 />
                 <div className="absolute top-2 right-2 flex gap-2">
                   <button
@@ -623,7 +623,7 @@ export default function NCheck() {
                 <img
                   src={field.value}
                   alt="Firma guardada"
-                  className="w-full h-32 object-contain border rounded-lg bg-gray-50"
+                  className="w-full h-64 object-contain border rounded-lg bg-gray-50"
                 />
                 <div className="absolute top-2 right-2 flex gap-2">
                   <button

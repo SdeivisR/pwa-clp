@@ -3,8 +3,8 @@ import { Trash2, Save, X, Image as ImageIcon } from "lucide-react";
 
 
 const ImagenPad = ({
-  width = 400,
-  height = 200,
+  width = 700,
+  height = 600,
   onSave,
   onCancel,
 }) => {
@@ -134,8 +134,8 @@ return (
           disabled={isLocked}
         >
           <option value="">Seleccionar vehiculo...</option>
-          <option value="../images/vehiculos/check.png">Auto</option>
-          <option value="../images/vehiculos/check.png">Camioneta</option>
+          <option value="../images/vehiculos/auto.png">Auto</option>
+          <option value="../images/vehiculos/Camioneta.png">Camioneta</option>
           <option value="../images/vehiculos/check.png">Van/Minivan</option>
           <option value="../images/vehiculos/check.png">Bus</option>
           <option value="../images/vehiculos/check.png">Camión</option>
@@ -185,26 +185,29 @@ return (
     </div>
 
     {/* 🖌️ Canvas */}
-    <div className="relative border-2 border-gray-300 rounded-xl bg-white shadow-inner">
-      {isEmpty && !backgroundImage && (
-        <div className="absolute inset-0 flex items-center justify-center text-gray-400 pointer-events-none">
-          Dibuje o cargue una imagen de fondo
-        </div>
-      )}
-      <canvas
-        ref={canvasRef}
-        className="rounded-xl touch-none"
-        onMouseDown={start}
-        onMouseMove={move}
-        onMouseUp={end}
-        onMouseLeave={end}
-        onTouchStart={start}
-        onTouchMove={move}
-        onTouchEnd={end}
-        width={width}
-        height={height}
-      />
+    <div className="relative border-2 border-gray-300 rounded-xl bg-white shadow-inner w-full overflow-auto">
+      <div className="min-w-[400px] min-h-[400px] flex justify-center items-center">
+        {isEmpty && !backgroundImage && (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400 pointer-events-none">
+            Dibuje o cargue una imagen de fondo
+          </div>
+        )}
+        <canvas
+          ref={canvasRef}
+          className="rounded-xl touch-none block"
+          onMouseDown={start}
+          onMouseMove={move}
+          onMouseUp={end}
+          onMouseLeave={end}
+          onTouchStart={start}
+          onTouchMove={move}
+          onTouchEnd={end}
+          width={width}
+          height={height}
+        />
+      </div>
     </div>
+
     
     {/* 🎨 Colores */}
     <div className="flex flex-col items-center gap-2">

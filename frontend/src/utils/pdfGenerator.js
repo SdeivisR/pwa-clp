@@ -315,36 +315,63 @@ export const generatePDF = async ({ title, content = {}, logoPath = "/images/log
         const image = await pdfDoc.embedPng(bytes).catch(() => pdfDoc.embedJpg(bytes));
 
         if (image) {
-          // 🔹 Definimos el espacio disponible (ancho de la columna)
           const maxW = colWidth - padding * 2;
-
-          // 🔹 Mantenemos el formato cuadrado (altura = ancho)
           const squareSize = maxW - 110;
-
-          // 🔹 Calculamos posición centrada dentro de la celda
           const imgX = x + (colWidth - squareSize) / 2;
           const imgY = yTop - rowHeight + padding;
-
-          // 🔹 Dibujamos la imagen con proporción cuadrada
           page.drawImage(image, {
-            x: imgX - 10,
+            x: imgX + 10,
             y: imgY - 6,
-            width: squareSize,
+            width: squareSize + 50,
             height: squareSize
           });
+          // 📋 Lista de observaciones al costado derecho
+          const textX = imgX + squareSize - 180; // posición al costado de la imagen
+          let textY = imgY + squareSize - 40;   // parte superior de la lista
+
+        const items = [
+          { label: "Otros", color: rgb(0, 0, 0) }, 
+          { label: "Fisura", color: rgb(1, 0, 0) },    
+          { label: "Golpe", color: rgb(1, 0.5, 0) }, 
+          { label: "Rayon", color: rgb(1, 1, 0) }, 
+          { label: "Suciedad", color: rgb(0, 0, 1) }, 
+        ];
+
+        for (const { label, color } of items) {
+          // Dibuja el círculo
+          page.drawCircle({
+            x: textX - 8,
+            y: textY + 3,
+            size: 3,
+            color,
+            borderColor: color,
+            borderWidth: 1,
+          });
+
+          // Dibuja el texto
+          page.drawText(label, {
+            x: textX + 2,
+            y: textY,
+            size: 10,
+            font,
+            color: rgb(0, 0, 0),
+          });
+
+          textY -= 14;
         }
-      } catch {
-        page.drawText("(Firma inválida)", {
-          x: x + padding,
-          y: yTop - rowHeight / 2,
-          size: 10,
-          font,
-          color: rgb(0.7, 0, 0)
-        });
       }
+    } catch {
+      page.drawText("(Firma inválida)", {
+        x: x + padding,
+        y: yTop - rowHeight / 2,
+        size: 10,
+        font,
+        color: rgb(0.7, 0, 0),
+      });
     }
-    return;
   }
+  return;
+}
 
   // --- TEXTO NORMAL ---
     const label = field.label ? field.label.trim() : "";

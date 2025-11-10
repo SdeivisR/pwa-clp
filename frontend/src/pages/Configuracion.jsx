@@ -1,10 +1,10 @@
 // src/pages/Settings.jsx
 import React, { useState, useEffect } from "react";
-import { User, Lock, Moon, Sun, Trash2, BookOpen, Pencil, Check } from "lucide-react";
+import { User, Lock,BookOpen, Pencil, Check } from "lucide-react";
 import Banner from "../components/Banner";
+import Guia from "../components/Guia";
 
 export default function Settings() {
-  const [darkMode, setDarkMode] = useState(false);
   const [banner, setBanner] = useState(null);
   const [bannerType, setBannerType] = useState("success");
   const [user, setUser] = useState({ nombre: "", email: "", cargo: "", id: null });
@@ -14,6 +14,7 @@ export default function Settings() {
     nueva: "",
     confirmar: "",
   });
+  const [visible, setVisible] = useState(false);
 
   // 📥 Cargar datos del usuario actual (desde localStorage)
   useEffect(() => {
@@ -188,7 +189,10 @@ const cambiarPassword = async () => {
         <p className="text-gray-600 dark:text-gray-400 mb-4">
           Aprende cómo usar las funciones principales del sistema paso a paso.
         </p>
-        <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+        <button
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+          onClick={() => setVisible(true)}
+        >
           Ver guía
         </button>
       </section>
@@ -198,6 +202,11 @@ const cambiarPassword = async () => {
           type={bannerType}
           onClose={() => setBanner(null)}
         />
+      )}
+      {visible && (
+        <Guia
+          visible={visible}
+          onClose={() => setVisible(false)}/>
       )}
     </div>
   );

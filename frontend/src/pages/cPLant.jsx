@@ -394,25 +394,34 @@ export default function ChecklistTemplateBuilder() {
           <span className="font-medium">Preestablecidos</span>  
           
         </button>
+      <div className="flex rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200 overflow-hidden">
+        {/* Botón izquierdo: Guardar */}
         <button
-          className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
-          onClick={() => {
-            if (id) {
+          className="flex flex-col items-center justify-center p-6 bg-white shadow-md hover:shadow-lg transition cursor-pointer  w-full border-r border-gray-200"
+          onClick={() => setModalVisible(true)}
+        >
+          <Save className="w-5 h-5" />
+          <span className="font-medium">{!id ? "Guardar" : "Guardar como nueva"}</span>
+        </button>
+
+        {/* Si hay plantilla, mostrar mitad derecha */}
+        {id && (
+          <button
+            className="flex flex-col items-center justify-center p-6 bg-white shadow-md hover:shadow-lg transition cursor-pointer  w-full border-r border-gray-200"
+            onClick={() => {
               setPlantillaSeleccionada({
                 id,
                 titulo: plantillaSeleccionada?.titulo,
                 descripcion: plantillaSeleccionada?.descripcion,
               });
               setOverwriteModalVisible(true);
-            } else {
-              setModalVisible(true);
-            }
-          }}
-        >
-          <Save className="w-5 h-5" />
-          <span className="font-medium">{id ? "Sobreescribir" : "Guardar"}</span>  
-          
-        </button>
+            }}
+          >
+            <Save className="w-5 h-5 text-red-600" />
+            <span className="font-medium text-red-600">Sobreescribir</span>
+          </button>
+        )}
+      </div>
         <button
           className="flex flex-col items-center justify-center p-6 bg-white shadow-md rounded-2xl hover:shadow-lg transition cursor-pointer border border-gray-200"
           onClick={() => {
