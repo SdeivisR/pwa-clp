@@ -29,6 +29,9 @@ app.use("/api/vehiculos", vehiculosRouter);
 app.use("/api/pdf", pdfRoutes);
 app.use('/api/dashboards', dashboardsRouter);
 app.use("/api/ai", aiRoutes);
+app.get("/", (req, res) => {
+  res.send("🚀 Backend funcionando correctamente en Azure");
+});
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
