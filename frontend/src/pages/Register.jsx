@@ -31,7 +31,7 @@ export default function Register() {
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/users/check-email", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/check-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email }),
@@ -55,7 +55,7 @@ export default function Register() {
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/users/register", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -79,7 +79,7 @@ const handleLogin = async (e) => {
   setMessage("");
 
   try {
-    const res = await fetch("http://localhost:3000/api/users/login", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/users/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 

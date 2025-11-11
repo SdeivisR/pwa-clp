@@ -138,7 +138,7 @@ export default function ChecklistTemplateBuilder() {
         throw new Error("Debe ingresar título y descripción");
       }
 
-      const response = await fetch("http://localhost:3000/api/plantillas", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/plantillas`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -186,7 +186,7 @@ export default function ChecklistTemplateBuilder() {
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/plantillas/${plantillaSeleccionada.id}`,
+        `http://${import.meta.env.VITE_API_URL}/plantillas/${plantillaSeleccionada.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -285,7 +285,7 @@ export default function ChecklistTemplateBuilder() {
       setGroups([]);
       return;
     }
-    fetch("http://localhost:3000/api/plantillas")
+    fetch(`${import.meta.env.VITE_API_URL}/plantillas`)
       .then(async (res) => {
         if (!res.ok) {
           const text = await res.text();

@@ -27,7 +27,7 @@ export default function Settings() {
   // ✏️ Guardar nombre actualizado
   const guardarNombre = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/users/${user.id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre: user.nombre }),
@@ -51,7 +51,7 @@ const cambiarPassword = async () => {
   }
 
   try {
-    const res = await fetch(`http://localhost:3000/api/users/${user.id}/password`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${user.id}/password`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

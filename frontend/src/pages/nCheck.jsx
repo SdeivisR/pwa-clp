@@ -151,7 +151,7 @@ export default function NCheck() {
 
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/plantillas")
+    fetch(`${import.meta.env.VITE_API_URL}/plantillas`)
       .then((res) => res.json())
       .then((data) => setPlantillas(data))
       .catch((err) => console.error("❌ Error cargando plantillas:", err));
@@ -766,13 +766,13 @@ export default function NCheck() {
             let vehiculo_id = 1;
 
             if (placaField || conductorField) {
-              const resBuscar = await fetch(`http://localhost:3000/api/vehiculos?placa=${placaField}`);
+              const resBuscar = await fetch(`${import.meta.env.VITE_API_URL}/vehiculos?placa=${placaField}`);
               const dataBuscar = await resBuscar.json();
 
               if (dataBuscar && dataBuscar.length > 0) {
                 vehiculo_id = dataBuscar[0].id;
               } else {
-                const resCrear = await fetch("http://localhost:3000/api/vehiculos", {
+                const resCrear = await fetch(`${import.meta.env.VITE_API_URL}/vehiculos`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ placa: placaField, conductor: conductorField }),
@@ -795,7 +795,7 @@ export default function NCheck() {
               fecha_salida: null,
             };
             // Guardar checklist en backend
-            const resChecklist = await fetch("http://localhost:3000/api/checklists", {
+            const resChecklist = await fetch(`${import.meta.env.VITE_API_URL}/checklists`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(checklistToSave),
@@ -816,7 +816,7 @@ export default function NCheck() {
       if (checklistId) {
         const fetchChecklist = async () => {
           try {
-            const res = await fetch(`http://localhost:3000/api/checklists/${checklistId}`);
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/checklists/${checklistId}`);
             const data = await res.json();
 
             // Parseamos el JSON que guardaste

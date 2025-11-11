@@ -9,7 +9,7 @@ export default function EditRoleModal({ visible, onClose, user, onSave }) {
     if (!visible) return;
     const fetchRoles = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/roles");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/roles`);
         const data = await res.json();
         setRoles(data);
       } catch (err) {

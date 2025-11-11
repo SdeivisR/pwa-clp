@@ -23,7 +23,7 @@ export default function HCheck() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/checklists")
+    fetch(`${import.meta.env.VITE_API_URL}/checklists`)
       .then(res => res.json())
       .then(data => {
         const updatedChecklists = data.map(chk => {
@@ -46,7 +46,7 @@ export default function HCheck() {
     };
   const handleCheckJSON = async (id,estado_id) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/pdf/generate-pdf/${id}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/pdf/generate-pdf/${id}`);
       if (!response.ok) throw new Error("Error obteniendo JSON");
 
       const checklistJSON = await response.json();
@@ -74,7 +74,7 @@ export default function HCheck() {
       );
 
       // Actualizar en la BD
-      await fetch(`http://localhost:3000/api/checklists/${id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/checklists/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ estado_id: 4 }),
@@ -101,7 +101,7 @@ export default function HCheck() {
     if (!toDelete.id) return;
     setDeleting(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/checklists/${toDelete.id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/checklists/${toDelete.id}`, {
         method: "DELETE",
       });
 
@@ -128,7 +128,7 @@ export default function HCheck() {
   };
   const handleChangeState = async (estado_id) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/checklists/${checklistToChange.id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/checklists/${checklistToChange.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ estado_id }),

@@ -23,7 +23,7 @@ export default function Users() {
     setLoadingList(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:3000/api/users");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users`);
       if (!res.ok) throw new Error("Error al cargar usuarios");
       const data = await res.json();
       setUsuarios(data);
@@ -56,7 +56,7 @@ export default function Users() {
     if (!toDelete.id) return;
     setDeleting(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/users/${toDelete.id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${toDelete.id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Error al eliminar usuario");
@@ -84,7 +84,7 @@ export default function Users() {
 
   const handleSaveEdit = async (id, rol_id) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/roles/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/roles/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rol_id }),

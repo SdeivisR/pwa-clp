@@ -24,7 +24,7 @@ export default function GPlant() {
   useEffect(() => {
     setLoadingList(true);
 
-    fetch("http://localhost:3000/api/plantillas")
+    fetch(`${import.meta.env.VITE_API_URL}/plantillas`)
       .then((res) => res.json())
       .then((data) => setPlantillas(data)) // 👈 ya llega lista
       .catch((err) => setError(`Error al cargar plantillas: ${err.message}`))
@@ -35,7 +35,7 @@ export default function GPlant() {
   // 📂 Cargar plantillas desde API
   const fetchPlantillas = async () => {
   try {
-    const res = await fetch(`http://localhost:3000/api/plantillas/${id}`);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/plantillas/${id}`);
     if (!res.ok) throw new Error(`Error al cargar plantilla ${id}`);
 
     const data = await res.json();
@@ -55,7 +55,7 @@ export default function GPlant() {
     if (!itemToDelete?.id) return;
     setDeleting(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/plantillas/${itemToDelete.id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/plantillas/${itemToDelete.id}`, {
         method: "DELETE",
       });
 
@@ -90,7 +90,7 @@ export default function GPlant() {
     try {
       const plantillaActual = editingPlantilla; 
 
-      const response = await fetch(`http://localhost:3000/api/plantillas/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/plantillas/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 

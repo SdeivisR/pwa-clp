@@ -73,7 +73,7 @@ export default function DashboardChecklists() {
   };
   async function predecirSeleccionado(id) {
     try {
-      const res = await fetch(`http://localhost:3000/api/dashboards/checklists/${id}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/dashboards/checklists/${id}`);
       const checklist = await res.json();
 
       if (!checklist || !checklist.contenido_json) {
@@ -117,13 +117,13 @@ export default function DashboardChecklists() {
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/dashboards/checklists')
+    fetch(`${import.meta.env.VITE_API_URL}/dashboards/checklists`)
       .then(res => res.json())
       .then(data => setChecklists(data))
       .catch(err => console.error('Error fetching checklists:', err));
   }, []);
   useEffect(() => {
-    fetch("http://localhost:3000/api/dashboards/scoreSalud")
+    fetch(`${import.meta.env.VITE_API_URL}/dashboards/scoreSalud`)
       .then((res) => {
         if (!res.ok) throw new Error("API no disponible");
         return res.json();
