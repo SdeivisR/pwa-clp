@@ -6,6 +6,9 @@ const db = mysql.createPool({
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "db_pwa_clp",
+  ssl: {
+    ca: fs.readFileSync("MysqlflexGlobalRootCA.crt.pem"),
+  },
 });
 
 module.exports = db;
