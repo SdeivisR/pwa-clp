@@ -85,7 +85,7 @@ export const generatePDF = async ({ title, content = {}, logoPath = "/images/log
     }
         // Título centrado (en el centro del cuadro)
     const titleText = String(title || "Checklist");
-    const titleSize = 16;
+    const titleSize = 14;
     const titleWidth = fontBold.widthOfTextAtSize(titleText, titleSize);
     const titleX = headerX + (headerWidth / 2) - (titleWidth / 2);
     // ajustar para que no pise el logo área (si el logo ocupa mucho)
@@ -96,12 +96,39 @@ export const generatePDF = async ({ title, content = {}, logoPath = "/images/log
     page.drawText(titleText, { x: finalTitleX, y: titleY, size: titleSize, font: fontBold, color: rgb(0.06, 0.06, 0.06) });
 
     // Fecha a la derecha dentro del cuadro
-    const dateStr = new Date().toLocaleString();
-    const dateSize = 10;
-    const dateWidth = font.widthOfTextAtSize(String(dateStr), dateSize);
-    const dateX = headerX + headerWidth - dateWidth - padding - 10;
-    const dateY = headerY + (headerHeight / 2) + (dateSize / 2) - 8;
-    page.drawText(String(dateStr), { x: dateX, y: dateY, size: dateSize, font, color: rgb(0.2, 0.2, 0.2) });
+    const now = new Date();
+    const dateStr = now.toLocaleDateString();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const dateSize = 8;
+    const timeSize = 8;
+
+    // Calculamos el ancho máximo (el de la fecha, para alinear bien)
+    const maxWidth = Math.max(
+      font.widthOfTextAtSize(dateStr, dateSize),
+      font.widthOfTextAtSize(timeStr, timeSize)
+    );
+
+    const dateX = headerX + headerWidth - maxWidth - padding - 10;
+    const dateY = headerY + headerHeight / 2 + 2; // posición vertical superior
+
+    // Dibuja la fecha (arriba)
+    page.drawText(dateStr, {
+      x: dateX,
+      y: dateY,
+      size: dateSize,
+      font,
+      color: rgb(0.2, 0.2, 0.2),
+    });
+
+    // Dibuja la hora (debajo de la fecha)
+    page.drawText(timeStr, {
+      x: dateX,
+      y: dateY - dateSize - 2, // desplazamiento hacia abajo
+      size: timeSize,
+      font,
+      color: rgb(0.2, 0.2, 0.2),
+    });
 
     // bajar el cursor Y para el contenido (un poco más de separación)
     y = headerY;

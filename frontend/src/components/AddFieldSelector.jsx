@@ -60,7 +60,7 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
         </button>
       </div>
       {/* Accordion con campos */}
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion type="single" collapsible className="w-full" >
         {groupFields.map((field, fieldIndex) => (
           <AccordionItem
             key={fieldIndex}
@@ -68,6 +68,7 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
             className="border rounded-md"
         >
           <div className="flex items-center justify-between px-2 py-1 gap-1 overflow-x-auto no-scrollbar">
+            <AccordionTrigger className="flex items-center justify-between px-3 py-2">
             <div className="flex items-center gap-1 flex-1 min-w-0">
               <input
                 type="text"
@@ -103,7 +104,9 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
             >
               <Trash2 size={14} />
             </button>
+            </AccordionTrigger>
           </div>
+
               <AccordionContent className="px-3 pb-3">
                 {field.type === "Texto" && (
                   <Input placeholder="Ingresa texto..." disabled className="bg-gray-100 cursor-not-allowed" />
@@ -154,7 +157,6 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
                 {field.type === "Comentario" && ( 
                   <Textarea placeholder="Escribe comentario..." disabled className="bg-gray-100 cursor-not-allowed"/>
                 )}
-                {/* Lista editable */}
                 {field.type === "Lista" && (
                   <div className="flex flex-col gap-2">
                     {field.items?.map((item, i) => (
@@ -199,7 +201,6 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
                     </button>
                   </div>
                 )}
-                {/* Seleccion Multiple editable */}
                 {field.type === "Selección Múltiple" && (
                   <div className="flex flex-col gap-2">
                     {field.items?.map((item, i) => (
@@ -297,7 +298,6 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
                     <div className="flex gap-2 mt-2"></div>
                   </div>
                 )}
-
                 {field.type === "Hora" && (
                     <input
                       type="time"
@@ -305,7 +305,6 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
                       className="bg-gray-100 cursor-not-allowed w-full border border-gray-300 rounded-md px-2 py-1"
                     />
                 )}
-
                 {field.type === "Fechas" && (
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
@@ -318,8 +317,6 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
                     </div>                  
                   </div>
                 )}
-
-
                 {field.type === "FechasP" && (
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
