@@ -186,7 +186,7 @@ export default function ChecklistTemplateBuilder() {
       }
 
       const response = await fetch(
-        `http://${import.meta.env.VITE_API_URL}/plantillas/${plantillaSeleccionada.id}`,
+        `${import.meta.env.VITE_API_URL}/plantillas/${plantillaSeleccionada.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

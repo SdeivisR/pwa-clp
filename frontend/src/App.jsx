@@ -11,7 +11,7 @@ import HCheck from "./pages/hCheck";
 import Register from "./pages/Register";
 import ChecklistTemplateBuilder from "./pages/cPlant";
 import MainLayout from "./pages/MainLayout";
-import ProtectedRoute from "./components/ProtectedRoute"; // ✅
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   return (

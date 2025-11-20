@@ -11,9 +11,16 @@ export default function DashboardChecklists() {
   const [selectedChecklist, setSelectedChecklist] = useState("");
   const [resultadoId, setResultadoId] = useState(null);
   const [mostrarTodo, setMostrarTodo] = useState(false);
+  const [search, setSearch] = useState("");
   const mantenimientos = checklists.filter(c => c.estado === "Mantenimiento").length;
   const sinProblemas = checklists.length - mantenimientos;
-  const filasAMostrar = mostrarTodo ? checklists : checklists.slice(0, 3);
+  const normalize = (str) =>
+    str
+      ?.toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
   const estadoOptions = {
     chart: { type: "pie" },
     title: { text: "Distribución de Estados" },
@@ -22,8 +29,8 @@ export default function DashboardChecklists() {
       {
         name: "Checklists",
         data: [
-          { name: "Mantenimiento", y: mantenimientos, color: "#f87171" },
-          { name: "Sin Problemas", y: sinProblemas, color: "#86efac" }
+          { name: "Mantenimiento", y: mantenimientos, color: "#fb2c36" },
+          { name: "Sin Problemas", y: sinProblemas, color: "#00c951" }
         ]
       }
     ],
@@ -41,9 +48,13 @@ export default function DashboardChecklists() {
       }
     }
   };
-  // Datos para gráfico de barras de Score
+// Calcular las series según el score
+  const bajo = scoreSalud.map(s => (s.score < 50 ? s.score : null));
+  const medio = scoreSalud.map(s => (s.score >= 50 && s.score <= 80 ? s.score : null));
+  const alto = scoreSalud.map(s => (s.score > 80 ? s.score : null));
+
   const scoreOptions = {
-    chart: { type: "column" },
+    chart: { type: "bar" },
     title: { text: "Score de Salud por Checklist" },
     credits: { enabled: false },
     xAxis: {
@@ -56,21 +67,14 @@ export default function DashboardChecklists() {
       title: { text: "Score (%)" }
     },
     series: [
-      {
-        name: "Score",
-        data: scoreSalud.map(s => s.score),
-        color: "#facc15"
-      }
+      { name: "Bajo (<50%)", color: "#fb2c36", data: bajo },
+      { name: "Medio (50-80%)", color: "#f0b100", data: medio },
+      { name: "Alto (>80%)", color: "#00c951", data: alto }
     ],
-    tooltip: {
-      pointFormat: "<b>{point.y}%</b>"
-    },
-    plotOptions: {
-      column: {
-        dataLabels: { enabled: true, format: "{y}%" }
-      }
-    }
+    tooltip: { pointFormat: "<b>{point.y}%</b>" },
+    plotOptions: { column: { dataLabels: { enabled: true, format: "{y}%" } } }
   };
+
   async function predecirSeleccionado(id) {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/dashboards/checklists/${id}`);
@@ -135,6 +139,21 @@ export default function DashboardChecklists() {
       });
   }, []);
 
+  const filteredChecklists = checklists.filter((c) => {
+    const text = normalize(search);
+
+    const id = normalize(c.folio || c.checklistId?.toString());
+    const estado = normalize(c.estado);
+
+    return (
+      id?.includes(text) ||
+      estado?.includes(text) 
+    );
+  });
+  const filasAMostrar = mostrarTodo 
+    ? filteredChecklists
+    : filteredChecklists.slice(0, 3);
+
 
  return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
@@ -171,6 +190,13 @@ export default function DashboardChecklists() {
       </div>
       {/* Tabla principal */}
       <div className="bg-white rounded-2xl shadow overflow-x-auto mb-8">
+      <input
+        type="text"
+        placeholder="Buscar por ID o estado..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="mb-3 w-full px-4 py-2 border rounded-xl"
+      />
       <table className="min-w-full border border-gray-200">
         <thead className="bg-gray-100 text-gray-700 uppercase text-sm">
           <tr>

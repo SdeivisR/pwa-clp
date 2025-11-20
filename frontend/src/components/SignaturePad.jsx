@@ -30,6 +30,26 @@ const SignaturePad = ({
     ctxRef.current = ctx;
   }, [width, height]);
 
+  // Listeners táctiles NO pasivos para evitar el error en móviles
+  useEffect(() => {
+    const canvas = canvasRef.current;
+
+    const handleStart = (e) => start(e);
+    const handleMove = (e) => move(e);
+    const handleEnd = (e) => end(e);
+
+    // 👇 Listeners con passive: false
+    canvas.addEventListener("touchstart", handleStart, { passive: false });
+    canvas.addEventListener("touchmove", handleMove, { passive: false });
+    canvas.addEventListener("touchend", handleEnd, { passive: false });
+
+    return () => {
+      canvas.removeEventListener("touchstart", handleStart);
+      canvas.removeEventListener("touchmove", handleMove);
+      canvas.removeEventListener("touchend", handleEnd);
+    };
+  }, []);
+
   const getPos = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -121,9 +141,6 @@ const SignaturePad = ({
           onMouseMove={move}
           onMouseUp={end}
           onMouseLeave={end}
-          onTouchStart={start}
-          onTouchMove={move}
-          onTouchEnd={end}
           width={400}
           height={200}
         />

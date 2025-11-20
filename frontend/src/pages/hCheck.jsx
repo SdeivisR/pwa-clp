@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Edit, Trash2, Eye } from "lucide-react";
+import { Edit, Trash2, Eye, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { generatePDFFromJSON } from "../helpers/generatePDFFromJSON";
 import { generatePDF } from "../utils/pdfGenerator"; 
@@ -11,7 +11,7 @@ import ChangeStateModal from "../components/ChangeStateModal";
 export default function HCheck() {
     const navigate = useNavigate();
     const [checklists, setChecklists] = useState([]);
-    const [selectedTemplate, setSelectedTemplate] = useState(null);
+    const [search, setSearch] = useState("");
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [toDelete, setToDelete] = useState({ id: null });
     const [deleting, setDeleting] = useState(false);
@@ -148,12 +148,52 @@ export default function HCheck() {
       alert(err.message);
     }
   };
+  const filteredChecklists = checklists.filter((chk) => {
+    const contenido = (() => {
+      try {
+        return JSON.parse(chk.contenido_json || "{}");
+      } catch {
+        return {};
+      }
+    })();
+
+    const text = search.toLowerCase();
+
+    return (
+      chk.folio?.toString().toLowerCase().includes(text) ||
+      contenido.placa?.toLowerCase().includes(text) ||
+      chk.estado_nombre?.toLowerCase().includes(text) ||
+      new Date(chk.fecha_creacion)
+        .toLocaleString()
+        .toLowerCase()
+        .includes(text)
+    );
+  });
+
 
   return (
+      
       <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
         <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">
           Lista de Checklists
         </h2>
+        <div className="mb-4 flex justify-center">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por plantilla, placa, estado o fecha..."
+            className="w-full max-w-md px-4 py-2 border rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition flex items-center justify-center"
+            title="Refrescar"
+          >
+            <RotateCcw size={18} className="text-gray-600" />
+          </button>
+        </div>
         <div className="bg-white rounded-2xl shadow overflow-x-auto mb-8">
           <table className="min-w-full border border-gray-200">
             <thead className="bg-gray-100 text-gray-700 uppercase text-sm">
@@ -166,7 +206,7 @@ export default function HCheck() {
               </tr>
             </thead>
             <tbody>
-              {checklists.map((chk, index) => {
+              {filteredChecklists.map((chk, index) => {
                 const contenido = JSON.parse(chk.contenido_json);
 
                 return (

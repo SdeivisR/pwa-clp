@@ -36,6 +36,25 @@ const ImagenPad = ({
 
     if (backgroundImage) drawBackground(backgroundImage);
   }, [width, height]);
+  // Listeners táctiles NO pasivos para evitar el error en móviles
+  useEffect(() => {
+    const canvas = canvasRef.current;
+
+    const handleStart = (e) => start(e);
+    const handleMove = (e) => move(e);
+    const handleEnd = (e) => end(e);
+
+    // 👇 Listeners con passive: false
+    canvas.addEventListener("touchstart", handleStart, { passive: false });
+    canvas.addEventListener("touchmove", handleMove, { passive: false });
+    canvas.addEventListener("touchend", handleEnd, { passive: false });
+
+    return () => {
+      canvas.removeEventListener("touchstart", handleStart);
+      canvas.removeEventListener("touchmove", handleMove);
+      canvas.removeEventListener("touchend", handleEnd);
+    };
+  }, []);
 
   // Actualiza color de dibujo
   useEffect(() => {
@@ -199,9 +218,6 @@ return (
           onMouseMove={move}
           onMouseUp={end}
           onMouseLeave={end}
-          onTouchStart={start}
-          onTouchMove={move}
-          onTouchEnd={end}
           width={width}
           height={height}
         />

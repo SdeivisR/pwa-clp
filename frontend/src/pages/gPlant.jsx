@@ -1,8 +1,8 @@
 // src/pages/gPlant.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit, Trash2, PlusCircle, File, Info } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import { Edit, Trash2, PlusCircle, File, Info, RotateCcw } from "lucide-react";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import EditPlantillaModal from "../components/EditPlantillaModal";
 
@@ -13,6 +13,7 @@ export default function GPlant() {
   const [plantillas, setPlantillas] = useState([]);
   const [deleting, setDeleting] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
+  const [search, setSearch] = useState("");
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingPlantilla, setEditingPlantilla] = useState({ id: null, titulo: "", descripcion: "" });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -110,24 +111,40 @@ export default function GPlant() {
       console.error("❌ Error guardando cambios:", err);
     }
   };
-  // 👉 Crear nueva plantilla
-  const nuevaPlantilla = () => {
-    navigate("/cPlant");
-  };
+
+  const filteredTemplates = plantillas.filter((item) => {
+    const text = search.toLowerCase();
+
+    return (
+      item.codigo?.toLowerCase().includes(text) ||
+      item.nombre?.toLowerCase().includes(text)
+    );
+  });
+
   return (
-  <div className="p-6 space-y-6">
-    <div className="flex justify-between items-center">
-      <h1 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">
-        Gestión de Plantillas
-      </h1>
-      <button
-        onClick={nuevaPlantilla}
-        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-      >
-        <PlusCircle size={18} />
-        Nueva Plantilla
-      </button>
-    </div>
+
+    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+        <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">
+          Gestión de Plantillas
+        </h2>
+        <div className="mb-4 flex justify-center">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por Codigo..."
+            className="w-full max-w-md px-4 py-2 border rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition flex items-center justify-center"
+            title="Refrescar"
+          >
+            <RotateCcw size={18} className="text-gray-600" />
+          </button>
+        </div>
+    
     {/* 📋 Lista de plantillas */}
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
       <div className="overflow-x-auto rounded-lg shadow">
@@ -143,7 +160,7 @@ export default function GPlant() {
             </tr>
           </thead>
           <tbody>
-            {plantillas.map((p, index) => (
+            {filteredTemplates.map((p, index) => (
               <tr
                 key={p.id}
                 className={`border-t ${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}

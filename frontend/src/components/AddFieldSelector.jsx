@@ -66,10 +66,8 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
             key={fieldIndex}
             value={`field-${fieldIndex}`}
             className="border rounded-md"
-        >
+          >
           <div className="flex items-center justify-between px-2 py-1 gap-1 overflow-x-auto no-scrollbar">
-            <AccordionTrigger className="flex items-center justify-between px-3 py-2">
-            <div className="flex items-center gap-1 flex-1 min-w-0">
               <input
                 type="text"
                 value={field.label}
@@ -97,16 +95,14 @@ export default function AddFieldSelector({ groupIndex, groupFields, addField, up
                 />
                 Req.
               </label>
-            </div>
-            <button
-              onClick={() => removeField(groupIndex, fieldIndex)}
-              className="hover:bg-red-100 text-red-600 rounded p-1 flex-shrink-0"
-            >
-              <Trash2 size={14} />
-            </button>
-            </AccordionTrigger>
+              <button
+                  onClick={() => removeField(groupIndex, fieldIndex)}
+                  className="hover:bg-red-100 text-red-600 rounded p-1 flex-shrink-0"
+                >
+                  <Trash2 size={14} />
+              </button>
+              <AccordionTrigger className="flex items-center justify-between px-3 py-2"></AccordionTrigger>
           </div>
-
               <AccordionContent className="px-3 pb-3">
                 {field.type === "Texto" && (
                   <Input placeholder="Ingresa texto..." disabled className="bg-gray-100 cursor-not-allowed" />

@@ -45,7 +45,7 @@ import Banner from "../components/Banner";
               }`}
               onClick={() => {
                 setValue("si");
-                updateFieldValue(field.id, { ...field, cB: "si" });
+                updateFieldValue(field.id, {cB: "si" });
                 setTouched(true);
               }}
             >
@@ -59,7 +59,7 @@ import Banner from "../components/Banner";
               }`}
               onClick={() => {
                 setValue("no");
-                updateFieldValue(field.id, { ...field, cB: "no" });
+                updateFieldValue(field.id, {cB: "no" });
                 setTouched(true);
               }}
             >
@@ -107,7 +107,7 @@ import Banner from "../components/Banner";
               }`}
               onClick={() => {
                 setValue("si");
-                handleChange(field.id, { ...field, cB: "si" });
+                handleChange(field.id, {cB: "si" });
                 setTouched(true);
               }}
             >
@@ -121,7 +121,7 @@ import Banner from "../components/Banner";
               }`}
               onClick={() => {
                 setValue("no");
-                handleChange(field.id, { ...field, cB: "no" });
+                handleChange(field.id, {cB: "no" });
                 setTouched(true);
               }}
             >
@@ -176,7 +176,7 @@ export default function NCheck() {
         estructura_json: (prev.estructura_json ?? []).map(group => ({
           ...group,
           fields: (group.fields ?? []).map(field =>
-            field.id === fieldId ? { ...field, cB: newValue } : field
+            field.id === fieldId ? { ...field, cB: newValue.cB } : field
           ),
         })),
       };
