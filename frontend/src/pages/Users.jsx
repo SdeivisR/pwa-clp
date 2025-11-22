@@ -13,7 +13,7 @@ export default function Users() {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [toDelete, setToDelete] = useState({ id: null, nombre: "" });
   const [deleting, setDeleting] = useState(false);
-
+  const [isCreateMode, setIsCreateMode] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const { user } = useContext(UserContext);
@@ -82,22 +82,56 @@ export default function Users() {
     setEditModalVisible(false);
   };
 
-  const handleSaveEdit = async (id, rol_id) => {
+  const handleSaveEdit = async (id, nombre, email, rol_id) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/roles/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rol_id }),
-      });
-      if (!res.ok) throw new Error("Error al actualizar usuario");
+
+      if (isCreateMode) {
+        // 👉 Crear nuevo usuario SÓLO CUANDO LE DAN GUARDAR
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/roles`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nombre,
+            email,
+            rol_id,
+            password: "$2b$10$apUP4d1XhfUorCiP22QsK.oUuMkAhsZCuqk4KbQbMoW75StBBC42y"
+          }),
+        });
+
+        if (!res.ok) throw new Error("Error al crear usuario");
+      } else {
+        // 👉 Modo edición
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/roles/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nombre, email, rol_id }),
+        });
+
+        if (!res.ok) throw new Error("Error al actualizar usuario");
+      }
 
       await fetchUsuarios();
       closeEditModal();
+      setIsCreateMode(false);
+
     } catch (err) {
       console.error("❌ Error guardando cambios:", err);
       setError("No se pudo guardar los cambios.");
     }
   };
+
+  const openCreateModal = () => {
+    setIsCreateMode(true);
+    setEditingUser({
+      id: null,
+      nombre: "",
+      email: "",
+      rol_id: 2
+    });
+    setEditModalVisible(true);
+  };
+
+
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
@@ -122,7 +156,7 @@ export default function Users() {
             </thead>
             <tbody>
               {usuarios
-                .filter((u) => u.id !== user?.id) // 👈 Excluir al usuario activo
+                .filter((u) => u.id !== user?.id)
                 .map((u, idx) => (
                 <tr
                   key={u.id}
@@ -157,6 +191,16 @@ export default function Users() {
                   </td>
                 </tr>
               ))}
+              <tr>
+                <td colSpan="4" className="p-4 text-center">
+                  <button
+                    onClick={openCreateModal}
+                    className="w-full bg-gray-50 hover:bg-gray-200 text-gray-600 font-semibold rounded-b px-4 py-2 transition-colors"
+                  >
+                    Agregar usuario
+                  </button>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>

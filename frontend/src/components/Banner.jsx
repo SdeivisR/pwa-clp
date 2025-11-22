@@ -3,31 +3,35 @@ import React from "react";
 
 export default function Banner({ message, type = "info", onClose }) {
   const colors = {
-    success: "from-green-500 to-green-600 text-white",
-    error: "from-red-500 to-red-600 text-white",
-    info: "from-blue-500 to-blue-600 text-white",
+    success: "text-green-600 border-green-500",
+    error: "text-red-600 border-red-500",
+    info: "text-blue-600 border-blue-500",
   };
 
   return (
     <div
       className={`
-        fixed right-5
-        top-20
+        fixed right-5 top-20
         p-4
         rounded-xl
-        shadow-2xl
-        bg-gradient-to-r ${colors[type]}
-        border border-white/20
-        backdrop-blur-sm
+        shadow-xl
+        bg-white
+        border-2
+        ${colors[type]}
         animate-slide-in
         z-50
       `}
       style={{ minWidth: "280px" }}
     >
       <div className="flex justify-between items-center">
-        <span className="font-medium">{message}</span>
+        <span className="font-semibold">{message}</span>
+
         <button
-          className="ml-3 font-bold text-xl hover:scale-110 transition-transform"
+          className={`
+            ml-3 font-bold text-xl
+            hover:scale-110 transition-transform
+            ${colors[type].split(" ")[0]}  // Solo el color del texto
+          `}
           onClick={onClose}
         >
           ×
@@ -36,4 +40,3 @@ export default function Banner({ message, type = "info", onClose }) {
     </div>
   );
 }
-

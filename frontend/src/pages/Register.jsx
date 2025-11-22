@@ -88,12 +88,8 @@ const handleLogin = async (e) => {
     });
     
     const data = await res.json();
-    console.log("📦 Respuesta cruda del backend:", data); 
-
     if (!res.ok) throw new Error(data.message || "Error de login");
-    
     localStorage.setItem("usuario", JSON.stringify(data.user));
-    console.log("📦 Usuario guardado en localStorage:", data.user);
     setUser(data.user);
     navigate("/home");
 

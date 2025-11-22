@@ -13,15 +13,17 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Error obteniendo roles" });
   }
 });
-//PUT/Actualizar rol de usuario
+
+
+// PUT /Actualizar datos del usuario (nombre, email, rol)
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { rol_id } = req.body;
+  const { nombre, email, rol_id } = req.body;
 
   try {
     const [result] = await pool.query(
-      "UPDATE usuarios SET rol_id = ? WHERE id = ?",
-      [rol_id, id]
+      "UPDATE usuarios SET nombre = ?, email = ?, rol_id = ? WHERE id = ?",
+      [nombre, email, rol_id, id]
     );
 
     if (result.affectedRows === 0) {
@@ -34,6 +36,24 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ error: "Error actualizando usuario" });
   }
 });
+
+router.post("/", async (req, res) => {
+  const { nombre, email, rol_id, password } = req.body;
+
+  try {
+    const [result] = await pool.query(
+      "INSERT INTO usuarios (nombre, email, rol_id, password) VALUES (?, ?, ?, ?)",
+      [nombre, email, rol_id, password]
+    );
+
+    res.json({ id: result.insertId, nombre, email, rol_id, password });
+
+  } catch (err) {
+    console.error("❌ Error creando usuario:", err);
+    res.status(500).json({ error: "Error creando usuario" });
+  }
+});
+
 
 
 module.exports = router;
